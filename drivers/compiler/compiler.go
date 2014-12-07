@@ -21,10 +21,6 @@ type scriptSchema struct {
 }
 
 func main() {
-	if _, err := os.Stat(`temp`); os.IsNotExist(err) {
-		os.Mkdir(`temp`, 0777)
-	}
-
 	compileGtfPkg()
 	// common.CompileStdGoPkg("webgui")
 	CompileTestScripts()
@@ -66,29 +62,6 @@ func CompileTestScripts() {
 	GenerateExecuteGoFile()
 }
 
-func CompileExecuteGoFile(fileName string) {
-	var doComepile bool = true
-	var pkgDir = common.PkgDir()
-	var binDir = common.BinDir()
-	var filePrefix = strings.TrimSuffix(fileName, ".go")
-	var execFileName = filePrefix + ".exe"
-	var pkgFileName = ` temp/` + filePrefix + ".a"
-
-	if common.IsFileExist(binDir, execFileName) {
-		pkgModTime := common.GetFileDate(binDir, execFileName)
-		goModTime := common.GetFileDate(`../execute/`, fileName)
-		if pkgModTime.After(goModTime) {
-			doComepile = false
-		}
-	}
-
-	if doComepile {
-		proLevel := os.Getenv("PROCESSOR_LEVEL")
-		common.ExecOSCmd("go tool %sg -o %s -I %s -pack ../execute/%s", proLevel, pkgFileName, pkgDir, fileName)
-		common.ExecOSCmd("go tool %sl -o %s%s -L %s%s", proLevel, binDir, execFileName, pkgDir, pkgFileName)
-	}
-}
-
 func appendExecuteInfo(goFileName string, rep int) {
 	goBaseName := strings.TrimSuffix(goFileName, ".go")
 	imports = imports + fmt.Sprintf("%s \"gtf/scripts/%s\"\n", goBaseName, goBaseName)
@@ -104,6 +77,27 @@ func encloseExecuteInfo() {
 	imports = imports + "\n)"
 	pkgs = pkgs + "\t}"
 	repetitions = repetitions + "\t}"
+}
+
+func CompileExecuteGoFile(fileName string) {
+	var doComepile bool = true
+	var filePrefix = strings.TrimSuffix(fileName, ".go")
+	var execFileName = filePrefix + ".exe"
+	var pkgFileName = ` temp/` + filePrefix + ".a"
+
+	if common.IsFileExist(common.GoBinDir, execFileName) {
+		pkgModTime := common.GetFileDate(common.GoBinDir, execFileName)
+		goModTime := common.GetFileDate(`../execute/`, fileName)
+		if pkgModTime.After(goModTime) {
+			doComepile = false
+		}
+	}
+
+	if doComepile {
+		proLevel := os.Getenv("PROCESSOR_LEVEL")
+		common.ExecOSCmd("go tool %sg -o %s -I %s -pack ../execute/%s", proLevel, pkgFileName, common.GoPkgDir, fileName)
+		common.ExecOSCmd("go tool %sl -o %s%s -L %s%s", proLevel, common.GoBinDir, execFileName, common.GoPkgDir, pkgFileName)
+	}
 }
 
 func GenerateExecuteGoFile() {
@@ -143,4 +137,10 @@ func decodeSuiteJson() []scriptSchema {
 		sch = append(sch, s)
 	}
 	return sch
+}
+
+func init() {
+	if _, err := os.Stat(`temp`); os.IsNotExist(err) {
+		os.Mkdir(`temp`, 0777)
+	}
 }

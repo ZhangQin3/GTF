@@ -85,7 +85,7 @@ func (tc *testCase) callCleanupOnCrashMethod() {
 			logStack(currentTestScript.logger, buf)
 		}
 	}()
-	tc.callCMethod("CleanupOnCrash")
+	tc.callMethod("CleanupOnCrash")
 }
 
 func (tc *testCase) callCleanupMethod() {
@@ -97,10 +97,10 @@ func (tc *testCase) callCleanupMethod() {
 			logStack(currentTestScript.logger, buf)
 		}
 	}()
-	tc.callCMethod("Cleanup")
+	tc.callMethod("Cleanup")
 }
 
-func (tc *testCase) callCMethod(method string) {
+func (tc *testCase) callMethod(method string) {
 	mc := tc.methodName + method
 	m := tc.testScript.tTest.MethodByName(mc)
 	if m.Kind() != reflect.Func {
