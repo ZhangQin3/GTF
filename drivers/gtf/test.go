@@ -79,8 +79,11 @@ func (t *Test) SetParam(param string, value interface{}, overridable ...bool) {
 	}
 }
 
-// Called by TestCaseProcedure in ths testcase scripts to run real tests.
-func (t *Test) ExecuteTestCase(f interface{}, tcid string, params ...interface{}) {
+// Called by TestCaseProcedure in ths testcase scripts to run real tests,
+// testLogicMethod is the real test method with test logic
+// tcid is the first parameter of the method testLogicMethod
+// params is other parameter(s), if any, of the method testLogicMethod
+func (t *Test) ExecuteTestCase(testLogicMethod interface{}, tcid string, params ...interface{}) {
 	defer func() {
 		logTcResult(currentTestScript.logger, tcid, tcDefinitions[tcid].tcDescription)
 	}()
@@ -101,16 +104,18 @@ func (t *Test) ExecuteTestCase(f interface{}, tcid string, params ...interface{}
 		return
 	}
 	logTcHearder(currentTestScript.logger, tcid, tcDefinitions[tcid].tcDescription)
-	tc := newTestCase(f, tcid, &params)
+	tc := newTestCase(testLogicMethod, tcid, &params)
 	tc.runTcMethod()
 }
 
 // ExecStep exemine if the (first) return of the func f matchs the string expect.
 // The expect string may be: "string", "regexp", "glob string", [num1, num2], [num1,num2), [num,),
 // {elem1, elem2, elem3,}, exp1||exp2||exp3
-func (t *Test) ExecStep(expect interface{}, f interface{}, params ...interface{}) {
+// stepLogicMethod is the test logic method of a step
+// params are  parameter(s), if any, of the method stepLogicMethod
+func (t *Test) ExecStep(expect interface{}, stepLogicMethod interface{}, params ...interface{}) {
 	var tcmParams []reflect.Value
-	sf := reflect.ValueOf(f)
+	sf := reflect.ValueOf(stepLogicMethod)
 	if sf.Kind() != reflect.Func {
 		panic("the step func mast be a function!")
 	}

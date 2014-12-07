@@ -17,11 +17,14 @@ type testCase struct {
 	testScript    *testScript
 }
 
-func newTestCase(f interface{}, tcid string, params *[]interface{}) *testCase {
+// testLogicMethod is the real test method with test logic
+// tcid is the first parameter of the method testLogicMethod
+// params is other parameter(s), if any, of the method testLogicMethod
+func newTestCase(testLogicMethod interface{}, tcid string, params *[]interface{}) *testCase {
 	var tcMParams []reflect.Value
 	var tc testCase
 	tc.testScript = currentTestScript
-	tp := reflect.ValueOf(f)
+	tp := reflect.ValueOf(testLogicMethod)
 	_, funcName := getFunctionName(tp)
 
 	if tp.Kind() != reflect.Func {
@@ -56,20 +59,20 @@ func (tc *testCase) runTcMethod() {
 			if !cleanupCalledFlag {
 				/* In case the same following two line are not executed after tc.tcMethod.Call(*tc.tcMParams). */
 				logHorizon(currentTestScript.logger)
-				currentTestScript.logger.GenerateStep("POST-TEST", "POST-TEST")
+				currentTestScript.logger.GenerateStep("PostTest", "PostTest")
 			}
 			tc.callCleanupOnCrashMethod()
 		}
 	}()
 	/* Add PRE-FIRST-STEP in case error occurs before first step. */
-	currentTestScript.logger.GenerateStep("PRE-FIRST-STEP", "PRE-FIRST-STEP")
+	currentTestScript.logger.GenerateStep("PreTest", "PreTest")
 	/* Call testcase method. */
 	tc.method.Call(*tc.methodParams)
 	/* Call testcase cleanup method if there is not panic in the procedure of testcase method
 	   if there is panic in the testcase method the cleanup method will not be called.*/
 	cleanupCalledFlag = true
 	logHorizon(currentTestScript.logger)
-	currentTestScript.logger.GenerateStep("POST-TEST", "POST-TEST")
+	currentTestScript.logger.GenerateStep("PostTest", "PostTest")
 	tc.callCleanupMethod()
 }
 
