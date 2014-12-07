@@ -6,18 +6,11 @@ import (
 	"reflect"
 )
 
-type tcDefinition struct {
-	tcid          string
-	tcDescription string
-	tcApplicable  string
-	tcRequirement string //The requirements that a TestCase needs to test environment or settings.
-	a             bool   //The applicability of the defined testcase is satisfied
-	r             bool   //The requirements of the defined testcase are satisfied
-}
+type paramsFlag bool
 
 const (
-	Overridable    bool = true
-	NonOverridable bool = false
+	Overridable    paramsFlag = true
+	NonOverridable paramsFlag = false
 )
 
 type Test struct{ DDD string }
@@ -28,48 +21,7 @@ func (t *Test) DefineCase(tcid, tcDescr string) *tcDefinition {
 	return tcdef
 }
 
-func (tcdef *tcDefinition) R(req string) {
-	tcdef.tcRequirement = req
-	tcdef.calcReqirement()
-	tcdef.a = true
-}
-
-func (tcdef *tcDefinition) A(app string) {
-	tcdef.tcApplicable = app
-	tcdef.calcApplicable()
-	tcdef.r = true
-}
-
-// TODO priority
-func (tcdef *tcDefinition) P(app string) {
-
-}
-
-// TODO feature list
-func (tcdef *tcDefinition) F(app string) {
-
-}
-
-func (tcdef *tcDefinition) RA(req, app string) {
-	tcdef.tcRequirement = req
-	tcdef.tcApplicable = app
-	tcdef.calcReqirement()
-	tcdef.calcApplicable()
-}
-
-func (tcdef *tcDefinition) calcApplicable() {
-	//TODO: the calculation of the applicalibity according to tcdef.tcApplicable
-	//The method should be independent from the feature tested.
-	tcdef.a = true
-}
-
-func (tcdef *tcDefinition) calcReqirement() {
-	//TODO: the calculation of the applicalibity according to tcdef.tcRequirement
-	//The method should be independent from the feature tested.
-	tcdef.r = true
-}
-
-func (t *Test) SetParam(param string, value interface{}, overridable ...bool) {
+func (t *Test) SetParam(param string, value interface{}, overridable ...paramsFlag) {
 	if len(overridable) > 1 {
 		panic("The overrideable parameter needs only ONE argument.")
 	}
@@ -80,10 +32,10 @@ func (t *Test) SetParam(param string, value interface{}, overridable ...bool) {
 }
 
 // Called by TestCaseProcedure in ths testcase scripts to run real tests,
-// testLogicMethod is the real test method with test logic
-// tcid is the first parameter of the method testLogicMethod
-// params is other parameter(s), if any, of the method testLogicMethod
-func (t *Test) ExecuteTestCase(testLogicMethod interface{}, tcid string, params ...interface{}) {
+// tcTestLogicMethod is the real test method with test logic
+// tcid is the first parameter of the method tcTestLogicMethod
+// params is other parameter(s), if any, of the method tcTestLogicMethod
+func (t *Test) ExecuteTestCase(tcTestLogicMethod interface{}, tcid string, params ...interface{}) {
 	defer func() {
 		logTcResult(currentTestScript.logger, tcid, tcDefinitions[tcid].tcDescription)
 	}()
@@ -104,18 +56,18 @@ func (t *Test) ExecuteTestCase(testLogicMethod interface{}, tcid string, params 
 		return
 	}
 	logTcHearder(currentTestScript.logger, tcid, tcDefinitions[tcid].tcDescription)
-	tc := newTestCase(testLogicMethod, tcid, &params)
+	tc := newTestCase(tcTestLogicMethod, tcid, &params)
 	tc.runTcMethod()
 }
 
 // ExecStep exemine if the (first) return of the func f matchs the string expect.
 // The expect string may be: "string", "regexp", "glob string", [num1, num2], [num1,num2), [num,),
 // {elem1, elem2, elem3,}, exp1||exp2||exp3
-// stepLogicMethod is the test logic method of a step
-// params are  parameter(s), if any, of the method stepLogicMethod
-func (t *Test) ExecStep(expect interface{}, stepLogicMethod interface{}, params ...interface{}) {
+// testStepLogicMethod is the test logic method of a step
+// params are  parameter(s), if any, of the method testStepLogicMethod
+func (t *Test) ExecStep(expect interface{}, testStepLogicMethod interface{}, params ...interface{}) {
 	var tcmParams []reflect.Value
-	sf := reflect.ValueOf(stepLogicMethod)
+	sf := reflect.ValueOf(testStepLogicMethod)
 	if sf.Kind() != reflect.Func {
 		panic("the step func mast be a function!")
 	}

@@ -17,14 +17,14 @@ type testCase struct {
 	testScript    *testScript
 }
 
-// testLogicMethod is the real test method with test logic
-// tcid is the first parameter of the method testLogicMethod
-// params is other parameter(s), if any, of the method testLogicMethod
-func newTestCase(testLogicMethod interface{}, tcid string, params *[]interface{}) *testCase {
+// tcTestLogicMethod is the real test method with test logic
+// tcid is the first parameter of the method tcTestLogicMethod
+// params is other parameter(s), if any, of the method tcTestLogicMethod
+func newTestCase(tcTestLogicMethod interface{}, tcid string, params *[]interface{}) *testCase {
 	var tcMParams []reflect.Value
 	var tc testCase
 	tc.testScript = currentTestScript
-	tp := reflect.ValueOf(testLogicMethod)
+	tp := reflect.ValueOf(tcTestLogicMethod)
 	_, funcName := getFunctionName(tp)
 
 	if tp.Kind() != reflect.Func {
