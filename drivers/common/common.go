@@ -17,8 +17,8 @@ var (
 	GoPath         = os.Getenv("gopath")
 	ScriptsPkgDir  = PkgDir() + "gtf/scripts/"
 	ScriptsSrcDir  = GoPath + "src/gtf/scripts/"
-	TSPkgDir       = PkgDir() + "gtf/testsuites/"
-	TSSrcDir       = GoPath + "src/gtf/testsuites/"
+	TsPkgDir       = PkgDir() + "gtf/testsuites/"
+	TsSrcDir       = GoPath + "src/gtf/testsuites/"
 	GtfPkgDir      = PkgDir() + "gtf/"
 	GoBinDir       = GoPath + "bin/"
 	ProcessorLevel = os.Getenv("PROCESSOR_LEVEL")
@@ -31,8 +31,8 @@ func init() {
 		os.MkdirAll(GoBinDir, 0777)
 	}
 
-	if _, err := os.Stat(TSPkgDir); os.IsNotExist(err) {
-		os.MkdirAll(TSPkgDir, 0777)
+	if _, err := os.Stat(TsPkgDir); os.IsNotExist(err) {
+		os.MkdirAll(TsPkgDir, 0777)
 	}
 
 	if _, err := os.Stat(ScriptsPkgDir); os.IsNotExist(err) {
@@ -77,38 +77,6 @@ func CompileGtfCompiler() {
 	ExecOSCmd(`go tool 6l -o %scompiler.exe -L %s %scompiler.a`, GoPkgDir, GoPkgDir, GoPkgDir)
 }
 
-func GetFileDate(fileDir string, fileName string) time.Time {
-	fileInfo, err := os.Stat(fileDir + fileName)
-	if err != nil {
-		panic(err)
-	}
-	return fileInfo.ModTime()
-}
-
-// If the package has been compiled
-func IsFileExist(dir, fileName string) bool {
-	if _, err := os.Stat(dir + fileName); os.IsNotExist(err) {
-		return false
-	} else {
-		return true
-	}
-}
-
-func ExecOSCmd(cmdStr string, args ...interface{}) {
-	if len(args) != 0 {
-		cmdStr = fmt.Sprintf(cmdStr, args...)
-	}
-	fmt.Printf("[DEGUG]: %s\n", cmdStr)
-	out, err := exec.Command("cmd.exe", "/c", cmdStr).CombinedOutput()
-	if err != nil {
-		fmt.Printf("[ERROR]: %s\n", out)
-		panic(err)
-	}
-	if len(out) != 0 {
-		fmt.Printf("%s\n", out)
-	}
-}
-
 func PkgDir() string {
 	var osType = "windows"
 	if os.Getenv("OSTYPE") == "linux" {
@@ -134,6 +102,23 @@ func driversDir() string {
 	return driverDire
 }
 
+func GetFileDate(fileDir string, fileName string) time.Time {
+	fileInfo, err := os.Stat(fileDir + fileName)
+	if err != nil {
+		panic(err)
+	}
+	return fileInfo.ModTime()
+}
+
+// If the package has been compiled
+func IsFileExist(dir, fileName string) bool {
+	if _, err := os.Stat(dir + fileName); os.IsNotExist(err) {
+		return false
+	} else {
+		return true
+	}
+}
+
 func CopyFile(src, dst string) (w int64, err error) {
 	srcFile, err := os.Open(src)
 	if err != nil {
@@ -149,4 +134,19 @@ func CopyFile(src, dst string) (w int64, err error) {
 	}
 	defer dstFile.Close()
 	return io.Copy(dstFile, srcFile)
+}
+
+func ExecOSCmd(cmdStr string, args ...interface{}) {
+	if len(args) != 0 {
+		cmdStr = fmt.Sprintf(cmdStr, args...)
+	}
+	fmt.Printf("[DEGUG]: %s\n", cmdStr)
+	out, err := exec.Command("cmd.exe", "/c", cmdStr).CombinedOutput()
+	if err != nil {
+		fmt.Printf("[ERROR]: %s\n", out)
+		panic(err)
+	}
+	if len(out) != 0 {
+		fmt.Printf("%s\n", out)
+	}
 }

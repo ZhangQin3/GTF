@@ -27,8 +27,8 @@ func main() {
 
 	compileGtfPkg()
 	// common.CompileStdGoPkg("webgui")
-	CompileTestFiles()
-	CompileExecuiteGoFile("execute.go")
+	CompileTestScripts()
+	CompileExecuteGoFile("execute.go")
 
 	// Remove All temp files
 	os.RemoveAll(`temp`)
@@ -46,7 +46,7 @@ var (
 	repetitions = "gtf.TestSuiteSchema.Repetitions = map[string]int{\n"
 )
 
-func CompileTestFiles() {
+func CompileTestScripts() {
 	schema := decodeSuiteJson()
 	if len(schema) == 0 {
 		panic("There is not any test script in the schema.")
@@ -66,22 +66,27 @@ func CompileTestFiles() {
 	GenerateExecuteGoFile()
 }
 
-func decodeSuiteJson() []scriptSchema {
-	var suite = new(tsuite.TSuite)
-	var sch []scriptSchema
-	suite.SuiteSchema()
-	dec := json.NewDecoder(strings.NewReader(suite.Schema))
+func CompileExecuteGoFile(fileName string) {
+	var doComepile bool = true
+	var pkgDir = common.PkgDir()
+	var binDir = common.BinDir()
+	var filePrefix = strings.TrimSuffix(fileName, ".go")
+	var execFileName = filePrefix + ".exe"
+	var pkgFileName = ` temp/` + filePrefix + ".a"
 
-	for {
-		var s scriptSchema
-		if err := dec.Decode(&s); err == io.EOF {
-			break
-		} else if err != nil {
-			panic(err)
+	if common.IsFileExist(binDir, execFileName) {
+		pkgModTime := common.GetFileDate(binDir, execFileName)
+		goModTime := common.GetFileDate(`../execute/`, fileName)
+		if pkgModTime.After(goModTime) {
+			doComepile = false
 		}
-		sch = append(sch, s)
 	}
-	return sch
+
+	if doComepile {
+		proLevel := os.Getenv("PROCESSOR_LEVEL")
+		common.ExecOSCmd("go tool %sg -o %s -I %s -pack ../execute/%s", proLevel, pkgFileName, pkgDir, fileName)
+		common.ExecOSCmd("go tool %sl -o %s%s -L %s%s", proLevel, binDir, execFileName, pkgDir, pkgFileName)
+	}
 }
 
 func appendExecuteInfo(goFileName string, rep int) {
@@ -122,25 +127,20 @@ func GenerateExecuteGoFile() {
 	common.ExecOSCmd(`gofmt -w ../execute/execute.go`)
 }
 
-func CompileExecuiteGoFile(fileName string) {
-	var doComepile bool = true
-	var pkgDir = common.PkgDir()
-	var binDir = common.BinDir()
-	var filePrefix = strings.TrimSuffix(fileName, ".go")
-	var execFileName = filePrefix + ".exe"
-	var pkgFileName = ` temp/` + filePrefix + ".a"
+func decodeSuiteJson() []scriptSchema {
+	var suite = new(tsuite.TSuite)
+	var sch []scriptSchema
+	suite.SuiteSchema()
+	dec := json.NewDecoder(strings.NewReader(suite.Schema))
 
-	if common.IsFileExist(binDir, execFileName) {
-		pkgModTime := common.GetFileDate(binDir, execFileName)
-		goModTime := common.GetFileDate(`../execute/`, fileName)
-		if pkgModTime.After(goModTime) {
-			doComepile = false
+	for {
+		var s scriptSchema
+		if err := dec.Decode(&s); err == io.EOF {
+			break
+		} else if err != nil {
+			panic(err)
 		}
+		sch = append(sch, s)
 	}
-
-	if doComepile {
-		proLevel := os.Getenv("PROCESSOR_LEVEL")
-		common.ExecOSCmd("go tool %sg -o %s -I %s -pack ../execute/%s", proLevel, pkgFileName, pkgDir, fileName)
-		common.ExecOSCmd("go tool %sl -o %s%s -L %s%s", proLevel, binDir, execFileName, pkgDir, pkgFileName)
-	}
+	return sch
 }

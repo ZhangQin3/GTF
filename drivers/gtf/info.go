@@ -15,7 +15,7 @@ func clearTcSteps(l *log.Logger) {
 	l.Steps = l.Steps[0:0]
 }
 
-func logTCResult(logger *log.Logger, tcid, tcDescription string) {
+func logTcResult(logger *log.Logger, tcid, tcDescription string) {
 	var FaildSteps string
 
 	defer clearTcSteps(logger)

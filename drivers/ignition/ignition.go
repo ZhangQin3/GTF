@@ -13,7 +13,7 @@ func compileGtfCompiler() {
 
 	common.CompileStdGoPkg("gtf/drivers/common")
 	common.CompileMultiFilesPkg("suite", common.GtfPkgDir)
-	common.CompileSingleFilePkg("tsuite.go", common.TSSrcDir, common.TSPkgDir)
+	common.CompileSingleFilePkg("tsuite.go", common.TsSrcDir, common.TsPkgDir)
 	common.CompileGtfCompiler()
 }
 

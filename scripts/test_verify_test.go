@@ -3,7 +3,7 @@ package verify
 import "gtf"
 import "gtf/log"
 
-type Test struct{ gtf.TEST }
+type Test struct{ gtf.Test }
 
 /* Script level global variables */
 var Str string

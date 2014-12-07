@@ -20,9 +20,9 @@ const (
 	NonOverridable bool = false
 )
 
-type TEST struct{ DDD string }
+type Test struct{ DDD string }
 
-func (t *TEST) DefineCase(tcid, tcDescr string) *tcDefinition {
+func (t *Test) DefineCase(tcid, tcDescr string) *tcDefinition {
 	tcdef := &tcDefinition{tcid: tcid, tcDescription: tcDescr}
 	tcDefs[tcid] = tcdef
 	return tcdef
@@ -69,7 +69,7 @@ func (tcdef *tcDefinition) calcReqirement() {
 	tcdef.r = true
 }
 
-func (t *TEST) SetParam(param string, value interface{}, overridable ...bool) {
+func (t *Test) SetParam(param string, value interface{}, overridable ...bool) {
 	if len(overridable) > 1 {
 		panic("The overrideable parameter needs only ONE argument.")
 	}
@@ -80,9 +80,9 @@ func (t *TEST) SetParam(param string, value interface{}, overridable ...bool) {
 }
 
 // Called by TestCaseProcedure in ths testcase scripts to run real tests.
-func (t *TEST) ExecuteTestCase(f interface{}, tcid string, params ...interface{}) {
+func (t *Test) ExecuteTestCase(f interface{}, tcid string, params ...interface{}) {
 	defer func() {
-		logTCResult(tstScript.logger, tcid, tcDefs[tcid].tcDescription)
+		logTcResult(tstScript.logger, tcid, tcDefs[tcid].tcDescription)
 	}()
 
 	fmt.Println("[STEP] FROM GTF's <<ExecuteTestCase>>")
@@ -108,7 +108,7 @@ func (t *TEST) ExecuteTestCase(f interface{}, tcid string, params ...interface{}
 // ExecStep exemine if the (first) return of the func f matchs the string expect.
 // The expect string may be: "string", "regexp", "glob string", [num1, num2], [num1,num2), [num,),
 // {elem1, elem2, elem3,}, exp1||exp2||exp3
-func (t *TEST) ExecStep(expect interface{}, f interface{}, params ...interface{}) {
+func (t *Test) ExecStep(expect interface{}, f interface{}, params ...interface{}) {
 	var tcmParams []reflect.Value
 	sf := reflect.ValueOf(f)
 	if sf.Kind() != reflect.Func {
