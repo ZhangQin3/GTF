@@ -43,12 +43,12 @@ var (
 )
 
 func CompileTestScripts() {
-	schema := decodeSuiteJson()
-	if len(schema) == 0 {
-		panic("There is not any test script in the schema.")
+	scriptSchemas := decodeSuiteJson()
+	if len(scriptSchemas) == 0 {
+		panic("There is not any test script in the scriptSchemas.")
 	}
 
-	for _, obj := range schema {
+	for _, obj := range scriptSchemas {
 		goFileName := obj.Script
 		fmt.Println(goFileName)
 		// Test file doex NOT exist.
