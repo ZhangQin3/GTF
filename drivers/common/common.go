@@ -26,7 +26,6 @@ var (
 )
 
 func init() {
-
 	if _, err := os.Stat(GoBinDir); os.IsNotExist(err) {
 		os.MkdirAll(GoBinDir, 0777)
 	}

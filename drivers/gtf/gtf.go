@@ -38,10 +38,7 @@ var (
 
 func GtfMain() {
 	var ts = initTestSuite()
-
 	runTestScripts(ts)
-
-	/* Call suite SuiteTeardown function. */
 	ts.SuiteTeardown()
 }
 
