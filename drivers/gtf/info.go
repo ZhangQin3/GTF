@@ -16,36 +16,36 @@ func clearTcSteps(l *log.Logger) {
 }
 
 func logTCResult(logger *log.Logger, tcid, tcDescription string) {
-	var faildStps string
+	var FaildSteps string
 
 	defer clearTcSteps(logger)
 
 	for _, v := range logger.Steps {
-		if (*v).StpFailed {
-			faildStps = faildStps + "{" + (*v).StpIdx + "} "
+		if (*v).IsFailed {
+			FaildSteps = FaildSteps + "{" + (*v).StepIndex + "} "
 		}
 	}
-	if faildStps != "" {
-		logFailAtTail(logger, faildStps)
+	if FaildSteps != "" {
+		logFailAtTail(logger, FaildSteps)
 	}
-	buf := genTcDataToTbl(logger, tcid, tcDescription, faildStps)
+	buf := genTcDataToTbl(logger, tcid, tcDescription, FaildSteps)
 
 	/* TODO: enhance it if possible. */
-	log.CloseLogFile()
-	fileContent, err := ioutil.ReadFile(logger.GetLogFileName())
+	log.CloseFile()
+	fileContent, err := ioutil.ReadFile(logger.GetFileName())
 	if err != nil {
 		panic(err)
 	}
 	insert := regexp.MustCompile(`<div style="display:none">hide</div>`)
 	fileContent = insert.ReplaceAll(fileContent, buf.Bytes())
-	ioutil.WriteFile(logger.GetLogFileName(), fileContent, 0666)
-	log.ReopenLogFile()
+	ioutil.WriteFile(logger.GetFileName(), fileContent, 0666)
+	log.ReopenFile()
 }
 
 func logTcHearder(logger *log.Logger, tcid, tcDescr string) {
 	logger.Output("TC_HEADING",
 		log.LOnlyFile,
-		log.TcHdrInfo{
+		log.TcHeaderInfo{
 			tcid,
 			time.Now().Format("2006-01-02 15:04:05"),
 			tcDescr,
@@ -60,18 +60,18 @@ func logHorizon(logger *log.Logger) {
 func logTsHearder(logger *log.Logger, pkgName string) {
 	logger.Output("TS_HEADING",
 		log.LOnlyFile,
-		log.TsHdrInfo{
+		log.TsHeaderInfo{
 			time.Now().String(),
 			pkgName,
 		})
 }
 
 func logStack(logger *log.Logger, buf []byte) {
-	logger.Output("PANIC", log.LFileConsole, fmt.Sprintf("%s\n", buf))
+	logger.Output("PANIC", log.LFileAndConsole, fmt.Sprintf("%s\n", buf))
 }
 
 func logFailAtTail(logger *log.Logger, v ...interface{}) {
-	logger.Output("D_FAIL", log.LFileConsole, fmt.Sprint(v...))
+	logger.Output("D_FAIL", log.LFileAndConsole, fmt.Sprint(v...))
 }
 
 /* Here only input failedStps, if failedStps != "" indicates there is some error happened. */
@@ -83,7 +83,7 @@ func genTcDataToTbl(logger *log.Logger, tcid, tcDescr, failedStps string) bytes.
 		failedStps,
 	}
 	var buf bytes.Buffer
-	if err := logger.GetLogTmpl().ExecuteTemplate(&buf, "REPORT_TBL", data); err != nil {
+	if err := logger.GetTemplate().ExecuteTemplate(&buf, "REPORT_TBL", data); err != nil {
 		panic(err)
 	}
 

@@ -31,7 +31,7 @@
 {{end}}
 
 {{define "STEP"}}
-<div id="TEST_STEP" name="TEST_STEP"><span  class="step"> <span class="d_pass"><br>  STEP {{.StepIdx}} [{{.Time}}]</span><span style="color:black;font-size:20">: {{.Text}} </span> </span></div>
+<div id="TEST_STEP" name="TEST_STEP"><span  class="step"> <span class="d_pass"><br>  STEP {{.StepIndex}} [{{.Time}}]</span><span style="color:black;font-size:20">: {{.Text}} </span> </span></div>
 {{end}}
 
 {{define "TS_HEADING"}}
@@ -81,9 +81,9 @@ Test Start: {{.Time}} </br>
 {{define "REPORT_TBL"}}
 <tr align="left" >
   <td  style="background :  ; color : black" name="tcid" align="left" >{{.TcID}}</td>
-  <td  style="background :  ; color : black" name="action" align="left" >{{.TcDescr}}</td>
-  <td  style="background :  ; color : black" name="description" align="left" >{{.TcDescr}} {{if .FaildStps}}<br>Fail reason: Failed steps:{{.FaildStps}}{{end}}<br></td>
-  <td class={{if .FaildStps}}"fail" {{else}}"pass"{{end}} name="result" align="left" >{{if .FaildStps}}FAILED{{else}}PASS{{end}}</a></td>
+  <td  style="background :  ; color : black" name="action" align="left" >{{.TcDescription}}</td>
+  <td  style="background :  ; color : black" name="description" align="left" >{{.TcDescription}} {{if .FailedSteps}}<br>Fail reason: Failed steps:{{.FailedSteps}}{{end}}<br></td>
+  <td class={{if .FailedSteps}}"fail" {{else}}"pass"{{end}} name="result" align="left" >{{if .FailedSteps}}FAILED{{else}}PASS{{end}}</a></td>
   <td  style="background :  ; color : black" name="Duration" align="left" >0.00</td>
 </tr>
 <div style="display:none">hide</div>

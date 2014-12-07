@@ -36,8 +36,8 @@ func main() {
 
 func compileGtfPkg() {
 	common.CompileStdGoPkg("gtf/drivers/common")
-	common.CompileGoFilesInDir("log", common.GtfPkgDir)
-	common.CompileGoFilesInDir("gtf", common.PkgDir())
+	common.CompileMultiFilesPkg("log", common.GtfPkgDir)
+	common.CompileMultiFilesPkg("gtf", common.GoPkgDir)
 }
 
 var (
@@ -60,7 +60,7 @@ func CompileTestFiles() {
 			fmt.Println("[WARNNING]: Test file " + goFileName + " does NOT exist!")
 			continue
 		}
-		common.CompileSingleGoFile(goFileName, common.ScriptsSrcDir, common.ScriptsPkgDir)
+		common.CompileSingleFilePkg(goFileName, common.ScriptsSrcDir, common.ScriptsPkgDir)
 		appendExecuteInfo(goFileName, obj.Repetitions)
 	}
 	GenerateExecuteGoFile()

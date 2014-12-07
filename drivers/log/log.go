@@ -4,12 +4,8 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"regexp"
-	"strconv"
-	"strings"
 	"sync"
 	"text/template"
-	"time"
 )
 
 // A Logger represents an active logging object that generates lines of
@@ -17,75 +13,65 @@ import (
 // the Writer's Write method.  A Logger can be used simultaneously from
 // multiple goroutines; it guarantees to serialize access to the Writer.
 type Logger struct {
-	mu          sync.Mutex         // ensures atomic writes; protects the following fields.
-	tmpl        *template.Template // the template used to writ log to file
-	text        string             // for accumulating text to write
-	stdOut      io.Writer          // destination for output
-	logFile     *os.File           // file destination for the output, if any.
-	logFileName string
+	mu          sync.Mutex // ensures atomic writes; protects the following fields.
+	text        string     // for accumulating text to write
+	stdOut      io.Writer  // destination for output
+	file        *os.File   // file destination for the output, if any.
+	fileName    string
+	template    *template.Template // the template used to writ log to file
 	Steps       []*tcStep
-	curStp      *tcStep
-	metaIdx     map[string]string
+	currentStep *tcStep
+	metaIndex   map[string]string
 }
 
-type stepInfo struct {
-	StepIdx string
-	Time    string
-	Text    string
-}
-
-type TcHdrInfo struct {
+type TcHeaderInfo struct {
 	TcID string
 	Time string
 	Text string
 }
 
-type TsHdrInfo struct {
+type TsHeaderInfo struct {
 	Time string
 	Text string
 }
 
 type TcResultToTbl struct {
-	TcID      string
-	TcDescr   string
-	TcResult  bool
-	FaildStps string
+	TcID          string
+	TcDescription string
+	TcResult      bool
+	FailedSteps   string
 }
+
+type flags int
 
 const (
-	LOnlyConsol = 1 << iota
+	LOnlyConsol flags = 1 << iota
 	LOnlyFile
-	LFileConsole = LOnlyConsol | LOnlyFile
-	Ldebug       = 1 << iota
+	Ldebug
+	LFileAndConsole flags = LOnlyConsol | LOnlyFile
 )
-
-type tcStep struct {
-	StpIdx    string
-	StpDscr   string
-	StpFailed bool
-}
 
 var log *Logger
 
 // NewLogger creates a new Logger. the Logger can writes log to the console and
 // a specific file.
-func NewLogger(logFileName, tmplFielName string) *Logger {
+func NewLogger(fileName, tmplFielName string) *Logger {
 	t, err := template.ParseFiles(tmplFielName)
 	if err != nil {
 		panic(err)
 	}
 
-	logFd, err := os.OpenFile(logFileName, os.O_RDWR|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile(fileName, os.O_RDWR|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)
 	}
 
-	log = &Logger{stdOut: os.Stdout, logFile: logFd, tmpl: t, logFileName: logFileName}
+	log = &Logger{stdOut: os.Stdout, file: logFile, template: t, fileName: fileName}
 	return log
 }
 
 // level: DEBUG, DEFAULT, INFO, WARNING, ERROR, SETUP, D_PASS, D_FAIL,
-func (l *Logger) Output(level string, writeTo int, info interface{}) {
+func (l *Logger) Output(level string, flags flags, info interface{}) {
 	if l == nil {
 		panic("The Logger l is not initialized.")
 	}
@@ -101,7 +87,7 @@ func (l *Logger) Output(level string, writeTo int, info interface{}) {
 	case stepInfo:
 		l.text = v.Text
 		data = v
-	case TcHdrInfo, TsHdrInfo:
+	case TcHeaderInfo, TsHeaderInfo:
 		data = v
 	default:
 		panic("Can't accept the info type.")
@@ -110,7 +96,7 @@ func (l *Logger) Output(level string, writeTo int, info interface{}) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if writeTo&LOnlyConsol != 0 {
+	if flags&LOnlyConsol != 0 {
 		// write to consol
 		if len(l.text) > 0 && l.text[len(l.text)-1] != '\n' {
 			l.text = l.text + "\n"
@@ -120,233 +106,81 @@ func (l *Logger) Output(level string, writeTo int, info interface{}) {
 		}
 	}
 
-	if writeTo&LOnlyFile != 0 {
+	if flags&LOnlyFile != 0 {
 		// write to file
-		if l.logFile == nil {
-			panic("The Output file [logFile] is nil.")
+		if l.file == nil {
+			panic("The Log Output file is nil.")
 		}
-		if err := l.tmpl.ExecuteTemplate(l.logFile, level, data); err != nil {
+		if err := l.template.ExecuteTemplate(l.file, level, data); err != nil {
 			panic(err)
 		}
 	}
 }
 
 // >>>>>>>>>>>>>>>>>> Exported Functions >>>>>>>>>>>>>>>>>>>
-// Not exported
-func println(level string, v ...interface{}) {
-	level = strings.ToUpper(level)
-	log.Output(level, LFileConsole, fmt.Sprintln(v...))
-}
-
-func Print(level string, v ...interface{}) {
-	level = strings.ToUpper(level)
-	log.Output(level, LFileConsole, fmt.Sprintln(v...))
-}
-
-func Printf(level string, format string, v ...interface{}) {
-	level = strings.ToUpper(level)
-	log.Output(level, LFileConsole, fmt.Sprintf(format, v...))
-}
-
 func Log(v ...interface{}) {
-	log.Output("INFO", LFileConsole, fmt.Sprintln(v...))
+	log.Output("INFO", LFileAndConsole, fmt.Sprintln(v...))
 }
 
 func Logf(format string, v ...interface{}) {
-	log.Output("INFO", LFileConsole, fmt.Sprintf(format, v...))
+	log.Output("INFO", LFileAndConsole, fmt.Sprintf(format, v...))
 }
 
 func Error(v ...interface{}) {
 	if len(log.Steps) == 0 {
-		log.GenStp("PRE-TEST", "PRE-TEST")
+		log.GenerateStep("PRE-TEST", "PRE-TEST")
 	}
-	log.curStp.StpFailed = true
-	log.Output("ERROR", LFileConsole, fmt.Sprintln(v...))
+	log.currentStep.IsFailed = true
+	log.Output("ERROR", LFileAndConsole, fmt.Sprintln(v...))
 }
 
 func Errorf(format string, v ...interface{}) {
 	if len(log.Steps) == 0 {
-		log.GenStp("PRE-TEST", "PRE-TEST")
+		log.GenerateStep("PRE-TEST", "PRE-TEST")
 	}
-	log.curStp.StpFailed = true
-	log.Output("ERROR", LFileConsole, fmt.Sprintf(format, v...))
+	log.currentStep.IsFailed = true
+	log.Output("ERROR", LFileAndConsole, fmt.Sprintf(format, v...))
 }
 
 func Warning(v ...interface{}) {
-	log.Output("WARNING", LFileConsole, fmt.Sprintln(v...))
+	log.Output("WARNING", LFileAndConsole, fmt.Sprintln(v...))
 }
 
 func Warningf(format string, v ...interface{}) {
-	log.Output("WARNING", LFileConsole, fmt.Sprintf(format, v...))
+	log.Output("WARNING", LFileAndConsole, fmt.Sprintf(format, v...))
 }
 
 func Debug(v ...interface{}) {
-	log.Output("DEBUG", LFileConsole, fmt.Sprint(v...))
+	log.Output("DEBUG", LFileAndConsole, fmt.Sprint(v...))
 }
 
 func Debugf(format string, v ...interface{}) {
-	log.Output("DEBUG", LFileConsole, fmt.Sprintf(format, v...))
-}
-
-// LogStep(1.1, "Setup xxxx"), 1.1 is "main index"."subIndex"
-func Step(stepIdx interface{}, f string, v ...interface{}) {
-	var idx string
-	switch si := stepIdx.(type) {
-	case int:
-		idx = strconv.Itoa(si)
-	case float64:
-		// Only support x.0-x.9 due to the prec is 1 here.
-		// TODO: Enhance the issue.
-		idx = strconv.FormatFloat(si, 'f', 1, 64)
-	case string:
-		idx = si
-		if idx == "." {
-			if log.curStp.StpIdx == "PRE-FIRST-STEP" {
-				idx = "1"
-			}
-			preId, err := strconv.Atoi(log.curStp.StpIdx)
-			if err == nil {
-				idx = strconv.Itoa(preId + 1)
-			}
-		}
-	default:
-		panic("Type does not support.")
-	}
-	// Calculate the step index that has "." index or index same with its previous one.
-	calcStepIndex(&idx, `(\w+)\.?(\d*)`)
-	// Handle the step index that is same with any one before it or has the same main index.
-	handleRepeatIdx(&idx)
-
-	stpDscr := fmt.Sprintf(f, v...)
-	stp := &tcStep{StpIdx: idx, StpDscr: stpDscr}
-	log.Steps = append(log.Steps, stp)
-	log.curStp = stp
-
-	log.Output("STEP",
-		LFileConsole,
-		stepInfo{
-			idx,
-			time.Now().Format("2006-01-02 15:04:05"),
-			stpDscr,
-		})
-}
-
-// LogStep(1.1, "%s", "Setup xxxx"), NOT exported for now
-func stepf(stepIdx interface{}, format string, v ...interface{}) {
-	var idx string
-	switch si := stepIdx.(type) {
-	case int:
-		idx = strconv.Itoa(si)
-	case float64:
-		// only support x.0-x.9 due to the prec is 1 here
-		idx = strconv.FormatFloat(si, 'f', 1, 64)
-	case string:
-		idx = si
-	default:
-		panic("Type does not support.")
-	}
-	stpDscr := fmt.Sprintf(format, v...)
-	log.GenStp(idx, stpDscr)
-	log.Output("STEP",
-		LFileConsole,
-		stepInfo{
-			idx,
-			time.Now().Format("2006-01-02 15:04:05"),
-			stpDscr,
-		})
+	log.Output("DEBUG", LFileAndConsole, fmt.Sprintf(format, v...))
 }
 
 // --------------------------------
-func ReopenLogFile() {
+func ReopenFile() {
 	if log == nil {
 		panic("The Logger log is not initialized.")
 	}
-	logFd, err := os.OpenFile(log.logFileName, os.O_RDWR|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile(log.fileName, os.O_RDWR|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)
 	}
-	log.logFile = logFd
+	log.file = logFile
 }
 
-func CloseLogFile() {
+func CloseFile() {
 	if log == nil {
 		panic("The Logger log is not initialized.")
 	}
-	log.logFile.Close()
+	log.file.Close()
 }
 
-func (l *Logger) GetLogTmpl() *template.Template {
-	return l.tmpl
+func (l *Logger) GetFileName() string {
+	return l.fileName
 }
 
-func (l *Logger) GetLogFileName() string {
-	return l.logFileName
-}
-
-func (l *Logger) GenStp(idx, dscr string) {
-	stp := &tcStep{StpIdx: idx, StpDscr: dscr}
-	l.Steps = append(l.Steps, stp)
-	l.curStp = stp
-}
-
-func calcStepIndex(idx *string, reg string) {
-	regStpIdx, _ := regexp.Compile(reg)
-	match := regStpIdx.FindAllStringSubmatch(log.curStp.StpIdx, 1)
-	Warning(match)
-	if match != nil && match[0][1] == *idx || *idx == "." {
-		if match[0][2] == "" && match[0][2] == "" {
-			*idx = match[0][1] + `.1`
-		} else if match[0][2] == "" {
-			*idx = *idx + `.1`
-		} else {
-			s, err := strconv.Atoi(match[0][2])
-			if err != nil {
-				panic(err)
-			}
-			*idx = match[0][1] + `.` + strconv.Itoa(s+1)
-		}
-	} else if *idx == "." {
-		if match[0][2] == "" {
-			*idx = match[0][1] + `.1`
-		} else {
-			s, err := strconv.Atoi(match[0][2])
-			if err != nil {
-				panic(err)
-			}
-			*idx = match[0][1] + `.` + strconv.Itoa(s+1)
-		}
-	}
-}
-
-func handleRepeatIdx(idx *string) {
-	regStpIdx, _ := regexp.Compile(`(\w+)\.?(\d*)`)
-	if log.metaIdx == nil {
-		log.metaIdx = make(map[string]string)
-	}
-
-	if !strings.Contains(*idx, ".") {
-		if i, ok := log.metaIdx[*idx]; ok {
-			match := regStpIdx.FindAllStringSubmatch(i, 1)
-			if match != nil {
-				if match[0][2] == "" {
-					i = i + `.1`
-				} else {
-					s, err := strconv.Atoi(match[0][2])
-					if err != nil {
-						panic(err)
-					}
-					i = match[0][1] + `.` + strconv.Itoa(s+1)
-				}
-			}
-			log.metaIdx[*idx] = i
-			*idx = i
-		} else {
-			log.metaIdx[*idx] = *idx
-		}
-	} else {
-		match := regStpIdx.FindAllStringSubmatch(*idx, 1)
-		if match != nil {
-			log.metaIdx[match[0][1]] = *idx
-		}
-	}
+func (l *Logger) GetTemplate() *template.Template {
+	return l.template
 }

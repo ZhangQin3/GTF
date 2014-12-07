@@ -56,20 +56,20 @@ func (tc *testCase) runTcMethod() {
 			if !cleanupCalledFlag {
 				/* In case the same following two line are not executed after tc.tcMethod.Call(*tc.tcMParams). */
 				logHorizon(tstScript.logger)
-				tstScript.logger.GenStp("POST-TEST", "POST-TEST")
+				tstScript.logger.GenerateStep("POST-TEST", "POST-TEST")
 			}
 			tc.callCleanupOnCrashMethod()
 		}
 	}()
 	/* Add PRE-FIRST-STEP in case error occurs before first step. */
-	tstScript.logger.GenStp("PRE-FIRST-STEP", "PRE-FIRST-STEP")
+	tstScript.logger.GenerateStep("PRE-FIRST-STEP", "PRE-FIRST-STEP")
 	/* Call testcase method. */
 	tc.tcMethod.Call(*tc.tcMParams)
 	/* Call testcase cleanup method if there is not panic in the procedure of testcase method
 	   if there is panic in the testcase method the cleanup method will not be called.*/
 	cleanupCalledFlag = true
 	logHorizon(tstScript.logger)
-	tstScript.logger.GenStp("POST-TEST", "POST-TEST")
+	tstScript.logger.GenerateStep("POST-TEST", "POST-TEST")
 	tc.callCleanupMethod()
 }
 

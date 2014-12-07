@@ -10,9 +10,10 @@ func main() {
 }
 
 func compileGtfCompiler() {
+
 	common.CompileStdGoPkg("gtf/drivers/common")
-	common.CompileGoFilesInDir("suite", common.GtfPkgDir)
-	common.CompileSingleGoFile("tsuite.go", common.TSSrcDir, common.TSPkgDir)
+	common.CompileMultiFilesPkg("suite", common.GtfPkgDir)
+	common.CompileSingleFilePkg("tsuite.go", common.TSSrcDir, common.TSPkgDir)
 	common.CompileGtfCompiler()
 }
 

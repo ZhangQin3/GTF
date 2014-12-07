@@ -5,7 +5,9 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -20,6 +22,7 @@ var (
 	GtfPkgDir      = PkgDir() + "gtf/"
 	GoBinDir       = GoPath + "bin/"
 	ProcessorLevel = os.Getenv("PROCESSOR_LEVEL")
+	DriversDir     = driversDir()
 )
 
 func init() {
@@ -35,6 +38,43 @@ func init() {
 	if _, err := os.Stat(ScriptsPkgDir); os.IsNotExist(err) {
 		os.MkdirAll(ScriptsPkgDir, 0777)
 	}
+}
+
+// the StdGoPkg means a package which follows the requirements of go cmd tool
+func CompileStdGoPkg(pkgName string) {
+	ExecOSCmd(`go install ` + pkgName)
+}
+
+// Compile all go files in a subdir of the dir drivers to a pkg
+// and put the pkg to the pkgloc
+func CompileMultiFilesPkg(dirName, pkgLoc string) {
+	files, _ := filepath.Glob(fmt.Sprintf("../%s/*.go", dirName))
+	input := strings.Join(files, " ")
+	ExecOSCmd("go tool %sg -o %s%s.a -I %s -pack %s", ProcessorLevel, pkgLoc, dirName, GoPkgDir, input)
+}
+
+// CompileGoFile compiles packages with only single go file.
+// The subdir MUST be the dir name in the $GOPATH\src dir, such as tests, ...
+func CompileSingleFilePkg(fileName, fileDir, pkgLoc string) {
+	var doComepile = true
+	var filePrefix = strings.TrimSuffix(fileName, ".go")
+	var pkgFileName = filePrefix + ".a"
+
+	if IsFileExist(GoPkgDir, pkgFileName) {
+		pkgModTime := GetFileDate(GoPkgDir, pkgFileName)
+		goModTime := GetFileDate(fileDir, fileName)
+		if pkgModTime.After(goModTime) {
+			doComepile = false
+		}
+	}
+	if doComepile {
+		ExecOSCmd("go tool %sg -o %s%s -I %s -pack %s%s", ProcessorLevel, pkgLoc, pkgFileName, GoPkgDir, fileDir, fileName)
+	}
+}
+
+func CompileGtfCompiler() {
+	ExecOSCmd(`go tool 6g -o %scompiler.a -I %s -pack ../compiler/compiler.go`, GoPkgDir, GoPkgDir)
+	ExecOSCmd(`go tool 6l -o %scompiler.exe -L %s %scompiler.a`, GoPkgDir, GoPkgDir, GoPkgDir)
 }
 
 func GetFileDate(fileDir string, fileName string) time.Time {
@@ -87,6 +127,13 @@ func BinDir() string {
 	return gopath + `bin\`
 }
 
+func driversDir() string {
+	_, commonFile, _, _ := runtime.Caller(0)
+	driverDire, _ := path.Split(path.Dir(commonFile))
+
+	return driverDire
+}
+
 func CopyFile(src, dst string) (w int64, err error) {
 	srcFile, err := os.Open(src)
 	if err != nil {
@@ -102,41 +149,4 @@ func CopyFile(src, dst string) (w int64, err error) {
 	}
 	defer dstFile.Close()
 	return io.Copy(dstFile, srcFile)
-}
-
-// the StdGoPkg means a package which follows the requirements of go cmd tool
-func CompileStdGoPkg(pkgName string) {
-	ExecOSCmd(`go install ` + pkgName)
-}
-
-// Compile all go files in a subdir of the dir drivers to a pkg
-// and put the pkg to the pkgloc
-func CompileGoFilesInDir(dirName, pkgLoc string) {
-	files, _ := filepath.Glob(fmt.Sprintf("../%s/*.go", dirName))
-	input := strings.Join(files, " ")
-	ExecOSCmd("go tool %sg -o %s%s.a -I %s -pack %s", ProcessorLevel, pkgLoc, dirName, GoPkgDir, input)
-}
-
-// CompileGoFile compiles packages with only single go file.
-// The subdir MUST be the dir name in the $GOPATH\src dir, such as tests, ...
-func CompileSingleGoFile(fileName, fileDir, pkgLoc string) {
-	var doComepile = true
-	var filePrefix = strings.TrimSuffix(fileName, ".go")
-	var pkgFileName = filePrefix + ".a"
-
-	if IsFileExist(GoPkgDir, pkgFileName) {
-		pkgModTime := GetFileDate(GoPkgDir, pkgFileName)
-		goModTime := GetFileDate(fileDir, fileName)
-		if pkgModTime.After(goModTime) {
-			doComepile = false
-		}
-	}
-	if doComepile {
-		ExecOSCmd("go tool %sg -o %s%s -I %s -pack %s%s", ProcessorLevel, pkgLoc, pkgFileName, GoPkgDir, fileDir, fileName)
-	}
-}
-
-func CompileGtfCompiler() {
-	ExecOSCmd(`go tool 6g -o %scompiler.a -I %s -pack ../compiler/compiler.go`, GoPkgDir, GoPkgDir)
-	ExecOSCmd(`go tool 6l -o %scompiler.exe -L %s %scompiler.a`, GoPkgDir, GoPkgDir, GoPkgDir)
 }
