@@ -11,14 +11,14 @@ import (
 	"time"
 )
 
-type testScriptsSchema struct {
+type testSuiteSchema struct {
 	TestScripts map[string]interface{}
 	Repetitions map[string]int
 }
 
 /* Global variable(s) exported. */
 var (
-	Tss testScriptsSchema
+	TestSuiteSchema testSuiteSchema
 )
 
 /* Contains the data for each test script */
@@ -40,7 +40,7 @@ func GtfMain() {
 	var ts = initTestSuite()
 
 	/*  scriptFileName, tTest := "test_verify_test", new(test_verify_test.Test) */
-	for scriptFileName, tTest := range Tss.TestScripts {
+	for scriptFileName, tTest := range TestSuiteSchema.TestScripts {
 		initTestScript(scriptFileName, tTest, ts)
 		if err := runTests(scriptFileName); err != nil {
 			continue /*Jump out to execute the next script. */
@@ -85,7 +85,7 @@ func runTests(scriptFileName string) (err error) {
 
 	/* Execute TestCaseProcedure, in the method TestCaseProcedure the function ExecuteTestCase
 	   will be called to execute each test procedure for each testcase via executing Test.ExecuteTestCase method. */
-	for i := 0; i < Tss.Repetitions[scriptFileName]; i++ {
+	for i := 0; i < TestSuiteSchema.Repetitions[scriptFileName]; i++ {
 		tp := tstScript.tTest.MethodByName("TestCaseProcedure")
 		tp.Call(nil)
 	}

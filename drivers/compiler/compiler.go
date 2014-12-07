@@ -42,8 +42,8 @@ func compileGtfPkg() {
 
 var (
 	imports     = "import ("
-	pkgs        = "gtf.Tss.TestScripts = map[string]interface{}{\n"
-	repetitions = "gtf.Tss.Repetitions = map[string]int{\n"
+	pkgs        = "gtf.TestSuiteSchema.TestScripts = map[string]interface{}{\n"
+	repetitions = "gtf.TestSuiteSchema.Repetitions = map[string]int{\n"
 )
 
 func CompileTestFiles() {
