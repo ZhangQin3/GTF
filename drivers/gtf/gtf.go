@@ -31,22 +31,15 @@ type testScript struct {
 
 /* Global variable(s) NOT exported. */
 var (
-	tstScript  *testScript
-	tcDefs     = make(map[string]*tcDefinition) /* The testcase defined in the method CaseDefinitions in the test script, the key is string tcid.. */
-	testParams = make(map[string]interface{})   /* The map uased to lay params inherited from testsuite and set from the testcase.. */
+	currentTestScript *testScript
+	tcDefinitions     = make(map[string]*tcDefinition) /* The testcase defined in the method CaseDefinitions in the test script, the key is string tcid.. */
+	testParams        = make(map[string]interface{})   /* The map uased to lay params inherited from testsuite and set from the testcase.. */
 )
 
 func GtfMain() {
 	var ts = initTestSuite()
 
-	/*  scriptFileName, tTest := "test_verify_test", new(test_verify_test.Test) */
-	for scriptFileName, tTest := range TestSuiteSchema.TestScripts {
-		initTestScript(scriptFileName, tTest, ts)
-		if err := runTests(scriptFileName); err != nil {
-			continue /*Jump out to execute the next script. */
-		}
-		cleanupTestScript(ts)
-	}
+	runTestScripts(ts)
 
 	/* Call suite SuiteTeardown function. */
 	ts.SuiteTeardown()
@@ -60,21 +53,42 @@ func initTestSuite() *tsuite.TSuite {
 }
 
 func initTestScript(scriptFileName string, tTest interface{}, ts *tsuite.TSuite) {
-	tstScript = nil
+	currentTestScript = nil
 	logFileName, logger := initTestLogFile(scriptFileName)
 	Test := reflect.ValueOf(tTest)
-	tstScript = &testScript{scriptName: scriptFileName, tTest: &Test, logger: logger, logFileName: logFileName}
+	currentTestScript = &testScript{scriptName: scriptFileName, tTest: &Test, logger: logger, logFileName: logFileName}
 
 	/* Initialize test execution params from the testsuite Params. */
 	testParams = ts.SuiteParams
 	ts.CaseSetup()
 
-	logTsHearder(tstScript.logger, scriptFileName)
+	logTsHearder(currentTestScript.logger, scriptFileName)
 }
 
-func runTests(scriptFileName string) (err error) {
-	tstScript.tTest.MethodByName("SetTestParams").Call(nil)
-	if csDef := tstScript.tTest.MethodByName("CaseDefinitions"); csDef.IsValid() {
+func cleanupTestScript(ts *tsuite.TSuite) {
+	/* Call test script level Cleanup method. */
+	tcpCleanup := currentTestScript.tTest.MethodByName("TestCaseProcedureCleanup")
+	if tcpCleanup.Kind() == reflect.Func {
+		tcpCleanup.Call(nil)
+	}
+
+	ts.CaseTeardown()
+}
+
+func runTestScripts(ts *tsuite.TSuite) {
+	/*  scriptFileName, tTest := "test_verify_test", new(test_verify_test.Test) */
+	for scriptFileName, tTest := range TestSuiteSchema.TestScripts {
+		initTestScript(scriptFileName, tTest, ts)
+		if err := runTestCases(scriptFileName); err != nil {
+			continue /*Jump out to execute the next script. */
+		}
+		cleanupTestScript(ts)
+	}
+}
+
+func runTestCases(scriptFileName string) (err error) {
+	currentTestScript.tTest.MethodByName("SetTestParams").Call(nil)
+	if csDef := currentTestScript.tTest.MethodByName("CaseDefinitions"); csDef.IsValid() {
 		/* The global variable tcDefs will be filled here. */
 		csDef.Call(nil)
 	} else {
@@ -86,20 +100,10 @@ func runTests(scriptFileName string) (err error) {
 	/* Execute TestCaseProcedure, in the method TestCaseProcedure the function ExecuteTestCase
 	   will be called to execute each test procedure for each testcase via executing Test.ExecuteTestCase method. */
 	for i := 0; i < TestSuiteSchema.Repetitions[scriptFileName]; i++ {
-		tp := tstScript.tTest.MethodByName("TestCaseProcedure")
+		tp := currentTestScript.tTest.MethodByName("TestCaseProcedure")
 		tp.Call(nil)
 	}
 	return nil
-}
-
-func cleanupTestScript(ts *tsuite.TSuite) {
-	/* Call test script level Cleanup method. */
-	tcpCleanup := tstScript.tTest.MethodByName("TestCaseProcedureCleanup")
-	if tcpCleanup.Kind() == reflect.Func {
-		tcpCleanup.Call(nil)
-	}
-
-	ts.CaseTeardown()
 }
 
 func initTestLogFile(testFileName string) (string, *log.Logger) {

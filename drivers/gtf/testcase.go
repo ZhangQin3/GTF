@@ -9,26 +9,26 @@ import (
 
 /* Contains the data for each testcase in a specfic test script. */
 type testCase struct {
-	tcMethod      reflect.Value    /* reflect method of testcase method. */
-	tcMParams     *[]reflect.Value /* params of the testcase method. */
-	tcMName       string           /* method name of the testcase method. */
-	methodCleaup  string           /* method name , if any, called if the testcase method ends normally, to clean up the test environment. */
-	methodOnCrash string           /* method name , if any, called if the testcase method crashed. */
-	tstScript     *testScript
+	method        reflect.Value    /* reflect method of testcase method. */
+	methodParams  *[]reflect.Value /* params of the testcase method. */
+	methodName    string           /* method name of the testcase method. */
+	cleaupMethod  string           /* method name , if any, called if the testcase method ends normally, to clean up the test environment. */
+	onCrashMethod string           /* method name , if any, called if the testcase method crashed. */
+	testScript    *testScript
 }
 
 func newTestCase(f interface{}, tcid string, params *[]interface{}) *testCase {
 	var tcMParams []reflect.Value
 	var tc testCase
-	tc.tstScript = tstScript
+	tc.testScript = currentTestScript
 	tp := reflect.ValueOf(f)
 	_, funcName := getFunctionName(tp)
 
 	if tp.Kind() != reflect.Func {
 		panic("The first param of the gtf.Execute must be a testcase method!")
 	}
-	tc.tcMName = funcName
-	tc.tcMethod = tp
+	tc.method = tp
+	tc.methodName = funcName
 
 	paramsLen := len(*params)
 	tcMParams = make([]reflect.Value, paramsLen+1)
@@ -38,7 +38,7 @@ func newTestCase(f interface{}, tcid string, params *[]interface{}) *testCase {
 			tcMParams[i+1] = reflect.ValueOf((*params)[i])
 		}
 	}
-	tc.tcMParams = &tcMParams
+	tc.methodParams = &tcMParams
 	return &tc
 }
 
@@ -50,26 +50,26 @@ func (tc *testCase) runTcMethod() {
 			log.Error(err)
 			var buf []byte = make([]byte, 1500)
 			runtime.Stack(buf, true)
-			logStack(tstScript.logger, buf)
+			logStack(currentTestScript.logger, buf)
 
 			/* Call testcase cleanup on crash methed if testcase method of cleanup method panics. */
 			if !cleanupCalledFlag {
 				/* In case the same following two line are not executed after tc.tcMethod.Call(*tc.tcMParams). */
-				logHorizon(tstScript.logger)
-				tstScript.logger.GenerateStep("POST-TEST", "POST-TEST")
+				logHorizon(currentTestScript.logger)
+				currentTestScript.logger.GenerateStep("POST-TEST", "POST-TEST")
 			}
 			tc.callCleanupOnCrashMethod()
 		}
 	}()
 	/* Add PRE-FIRST-STEP in case error occurs before first step. */
-	tstScript.logger.GenerateStep("PRE-FIRST-STEP", "PRE-FIRST-STEP")
+	currentTestScript.logger.GenerateStep("PRE-FIRST-STEP", "PRE-FIRST-STEP")
 	/* Call testcase method. */
-	tc.tcMethod.Call(*tc.tcMParams)
+	tc.method.Call(*tc.methodParams)
 	/* Call testcase cleanup method if there is not panic in the procedure of testcase method
 	   if there is panic in the testcase method the cleanup method will not be called.*/
 	cleanupCalledFlag = true
-	logHorizon(tstScript.logger)
-	tstScript.logger.GenerateStep("POST-TEST", "POST-TEST")
+	logHorizon(currentTestScript.logger)
+	currentTestScript.logger.GenerateStep("POST-TEST", "POST-TEST")
 	tc.callCleanupMethod()
 }
 
@@ -79,7 +79,7 @@ func (tc *testCase) callCleanupOnCrashMethod() {
 			log.Error(err)
 			var buf []byte = make([]byte, 1500)
 			runtime.Stack(buf, true)
-			logStack(tstScript.logger, buf)
+			logStack(currentTestScript.logger, buf)
 		}
 	}()
 	tc.callCMethod("CleanupOnCrash")
@@ -91,15 +91,15 @@ func (tc *testCase) callCleanupMethod() {
 			log.Error(err)
 			var buf []byte = make([]byte, 1500)
 			runtime.Stack(buf, true)
-			logStack(tstScript.logger, buf)
+			logStack(currentTestScript.logger, buf)
 		}
 	}()
 	tc.callCMethod("Cleanup")
 }
 
 func (tc *testCase) callCMethod(method string) {
-	mc := tc.tcMName + method
-	m := tc.tstScript.tTest.MethodByName(mc)
+	mc := tc.methodName + method
+	m := tc.testScript.tTest.MethodByName(mc)
 	if m.Kind() != reflect.Func {
 		log.Warningf("The %s method %s is NOT definded.", method, mc)
 	} else {

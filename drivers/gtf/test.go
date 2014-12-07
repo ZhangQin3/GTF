@@ -24,7 +24,7 @@ type Test struct{ DDD string }
 
 func (t *Test) DefineCase(tcid, tcDescr string) *tcDefinition {
 	tcdef := &tcDefinition{tcid: tcid, tcDescription: tcDescr}
-	tcDefs[tcid] = tcdef
+	tcDefinitions[tcid] = tcdef
 	return tcdef
 }
 
@@ -82,11 +82,11 @@ func (t *Test) SetParam(param string, value interface{}, overridable ...bool) {
 // Called by TestCaseProcedure in ths testcase scripts to run real tests.
 func (t *Test) ExecuteTestCase(f interface{}, tcid string, params ...interface{}) {
 	defer func() {
-		logTcResult(tstScript.logger, tcid, tcDefs[tcid].tcDescription)
+		logTcResult(currentTestScript.logger, tcid, tcDefinitions[tcid].tcDescription)
 	}()
 
 	fmt.Println("[STEP] FROM GTF's <<ExecuteTestCase>>")
-	if tcdef, ok := tcDefs[tcid]; ok {
+	if tcdef, ok := tcDefinitions[tcid]; ok {
 		if !tcdef.a {
 			fmt.Println("[ERROR] The testcase is not applicable.")
 			return
@@ -100,7 +100,7 @@ func (t *Test) ExecuteTestCase(f interface{}, tcid string, params ...interface{}
 		fmt.Println("[ERROR] The testcase is not defined.")
 		return
 	}
-	logTcHearder(tstScript.logger, tcid, tcDefs[tcid].tcDescription)
+	logTcHearder(currentTestScript.logger, tcid, tcDefinitions[tcid].tcDescription)
 	tc := newTestCase(f, tcid, &params)
 	tc.runTcMethod()
 }
