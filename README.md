@@ -1,5 +1,5 @@
 
---> GTF MUST be put under $gopath\src, NOT under $gopath\src\github.com\ZhangQin3 <--
+--> GTF MUST be put under $gopath\src, NOT under $gopath\src\github.com\ZhangQin3. GTF is an application, not a package. <--
 
 This is a generic test automation framework based on golang, it is named as Generic Testing Framework(GTF). Now, GTF is in its very early stage, but it has provide most necessary features that a mature testing framework shall provide, it can be used in unit test, integration test, system test and acceptance test with only a little simple adaption.
 
