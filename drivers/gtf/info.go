@@ -46,7 +46,7 @@ func logTcResult(logger *log.Logger, tcid, tcDescription string) {
 	if FaildSteps != "" {
 		logFailAtTail(logger, FaildSteps)
 	}
-	tcSummaryResult := generateTcSummaryResult(logger, tcid, tcDescription, FaildSteps)
+	tcSummaryResult := generateTcResultSummary(logger, tcid, tcDescription, FaildSteps)
 
 	/* TODO: enhance it if possible. */
 	logger.CloseFile()
@@ -73,7 +73,7 @@ func logFailAtTail(logger *log.Logger, v ...interface{}) {
 }
 
 /* Here only input failedStps, if failedStps != "" indicates there is some error happened. */
-func generateTcSummaryResult(logger *log.Logger, tcid, tcDescr, failedStps string) bytes.Buffer {
+func generateTcResultSummary(logger *log.Logger, tcid, tcDescr, failedStps string) bytes.Buffer {
 	data := log.TcResultSummary{
 		tcid,
 		tcDescr,

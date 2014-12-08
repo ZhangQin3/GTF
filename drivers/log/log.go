@@ -117,7 +117,32 @@ func (l *Logger) Output(level string, flags flags, info interface{}) {
 	}
 }
 
-// >>>>>>>>>>>>>>>>>> Exported Functions >>>>>>>>>>>>>>>>>>>
+func (l *Logger) ReopenFile() {
+	if l == nil {
+		panic("The Logger log is not initialized.")
+	}
+	logFile, err := os.OpenFile(l.fileName, os.O_RDWR|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+	l.file = logFile
+}
+
+func (l *Logger) CloseFile() {
+	if l == nil {
+		panic("The Logger log is not initialized.")
+	}
+	l.file.Close()
+}
+
+func (l *Logger) GetFileName() string {
+	return l.fileName
+}
+
+func (l *Logger) GetTemplate() *template.Template {
+	return l.template
+}
+
 func Log(v ...interface{}) {
 	log.Output("INFO", LFileAndConsole, fmt.Sprintln(v...))
 }
@@ -156,31 +181,4 @@ func Debug(v ...interface{}) {
 
 func Debugf(format string, v ...interface{}) {
 	log.Output("DEBUG", LFileAndConsole, fmt.Sprintf(format, v...))
-}
-
-// --------------------------------
-func (l *Logger) ReopenFile() {
-	if l == nil {
-		panic("The Logger log is not initialized.")
-	}
-	logFile, err := os.OpenFile(l.fileName, os.O_RDWR|os.O_APPEND, 0666)
-	if err != nil {
-		panic(err)
-	}
-	l.file = logFile
-}
-
-func (l *Logger) CloseFile() {
-	if l == nil {
-		panic("The Logger log is not initialized.")
-	}
-	l.file.Close()
-}
-
-func (l *Logger) GetFileName() string {
-	return l.fileName
-}
-
-func (l *Logger) GetTemplate() *template.Template {
-	return l.template
 }
