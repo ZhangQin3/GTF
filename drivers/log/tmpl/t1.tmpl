@@ -78,11 +78,11 @@ Test Start: {{.Time}} </br>
 </div>
 {{end}}
 
-{{define "REPORT_TBL"}}
+{{define "RESULT_SUMMARY"}}
 <tr align="left" >
   <td  style="background :  ; color : black" name="tcid" align="left" >{{.TcID}}</td>
-  <td  style="background :  ; color : black" name="action" align="left" >{{.TcDescription}}</td>
-  <td  style="background :  ; color : black" name="description" align="left" >{{.TcDescription}} {{if .FailedSteps}}<br>Fail reason: Failed steps:{{.FailedSteps}}{{end}}<br></td>
+  <td  style="background :  ; color : black" name="action" align="left" >{{.Description}}</td>
+  <td  style="background :  ; color : black" name="description" align="left" >{{.Description}} {{if .FailedSteps}}<br>Fail reason: Failed steps:{{.FailedSteps}}{{end}}<br></td>
   <td class={{if .FailedSteps}}"fail" {{else}}"pass"{{end}} name="result" align="left" >{{if .FailedSteps}}FAILED{{else}}PASS{{end}}</a></td>
   <td  style="background :  ; color : black" name="Duration" align="left" >0.00</td>
 </tr>

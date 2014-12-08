@@ -35,11 +35,11 @@ type TsHeaderInfo struct {
 	Text string
 }
 
-type TcResultToTbl struct {
-	TcID          string
-	TcDescription string
-	TcResult      bool
-	FailedSteps   string
+type TcResultSummary struct {
+	TcID        string
+	Description string
+	Result      bool
+	FailedSteps string
 }
 
 type flags int
