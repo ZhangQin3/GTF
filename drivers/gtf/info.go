@@ -1,3 +1,4 @@
+// These functions wraps gtf/log to used only in the gtf package.
 package gtf
 
 import (
@@ -9,40 +10,21 @@ import (
 	"time"
 )
 
-/* These functions wraps gtf/log to used only in the gtf package. */
-
 func clearTcSteps(l *log.Logger) {
 	l.Steps = l.Steps[0:0]
 }
 
-func logTcResult(logger *log.Logger, tcid, tcDescription string) {
-	var FaildSteps string
-
-	defer clearTcSteps(logger)
-
-	for _, v := range logger.Steps {
-		if (*v).IsFailed {
-			FaildSteps = FaildSteps + "{" + (*v).StepIndex + "} "
-		}
-	}
-	if FaildSteps != "" {
-		logFailAtTail(logger, FaildSteps)
-	}
-	buf := genTcDataToTbl(logger, tcid, tcDescription, FaildSteps)
-
-	/* TODO: enhance it if possible. */
-	log.CloseFile()
-	fileContent, err := ioutil.ReadFile(logger.GetFileName())
-	if err != nil {
-		panic(err)
-	}
-	insert := regexp.MustCompile(`<div style="display:none">hide</div>`)
-	fileContent = insert.ReplaceAll(fileContent, buf.Bytes())
-	ioutil.WriteFile(logger.GetFileName(), fileContent, 0666)
-	log.ReopenFile()
+/* Log a test script information in the report file. */
+func logTsHeader(logger *log.Logger, pkgName string) {
+	logger.Output("TS_HEADING",
+		log.LOnlyFile,
+		log.TsHeaderInfo{
+			time.Now().String(),
+			pkgName,
+		})
 }
 
-func logTcHearder(logger *log.Logger, tcid, tcDescr string) {
+func logTcHeader(logger *log.Logger, tcid, tcDescr string) {
 	logger.Output("TC_HEADING",
 		log.LOnlyFile,
 		log.TcHeaderInfo{
@@ -52,18 +34,34 @@ func logTcHearder(logger *log.Logger, tcid, tcDescr string) {
 		})
 }
 
-func logHorizon(logger *log.Logger) {
-	logger.Output("HORIZON", log.LOnlyFile, nil)
+func logTcResult(logger *log.Logger, tcid, tcDescription string) {
+	var FaildSteps string
+	defer clearTcSteps(logger)
+
+	for _, step := range logger.Steps {
+		if step.IsFailed {
+			FaildSteps = FaildSteps + "{" + step.StepIndex + "} "
+		}
+	}
+	if FaildSteps != "" {
+		logFailAtTail(logger, FaildSteps)
+	}
+	tcSummaryResult := generateTcSummaryResult(logger, tcid, tcDescription, FaildSteps)
+
+	/* TODO: enhance it if possible. */
+	logger.CloseFile()
+	logFileContent, err := ioutil.ReadFile(logger.GetFileName())
+	if err != nil {
+		panic(err)
+	}
+	regexpInsertTcSummary := regexp.MustCompile(`<div style="display:none">hide</div>`)
+	logFileContent = regexpInsertTcSummary.ReplaceAll(logFileContent, tcSummaryResult.Bytes())
+	ioutil.WriteFile(logger.GetFileName(), logFileContent, 0666)
+	logger.ReopenFile()
 }
 
-/* Log a test script information in the report file. */
-func logTsHearder(logger *log.Logger, pkgName string) {
-	logger.Output("TS_HEADING",
-		log.LOnlyFile,
-		log.TsHeaderInfo{
-			time.Now().String(),
-			pkgName,
-		})
+func logHorizon(logger *log.Logger) {
+	logger.Output("HORIZON", log.LOnlyFile, nil)
 }
 
 func logStack(logger *log.Logger, buf []byte) {
@@ -75,7 +73,7 @@ func logFailAtTail(logger *log.Logger, v ...interface{}) {
 }
 
 /* Here only input failedStps, if failedStps != "" indicates there is some error happened. */
-func genTcDataToTbl(logger *log.Logger, tcid, tcDescr, failedStps string) bytes.Buffer {
+func generateTcSummaryResult(logger *log.Logger, tcid, tcDescr, failedStps string) bytes.Buffer {
 	data := log.TcResultToTbl{
 		tcid,
 		tcDescr,
@@ -86,6 +84,5 @@ func genTcDataToTbl(logger *log.Logger, tcid, tcDescr, failedStps string) bytes.
 	if err := logger.GetTemplate().ExecuteTemplate(&buf, "REPORT_TBL", data); err != nil {
 		panic(err)
 	}
-
 	return buf
 }

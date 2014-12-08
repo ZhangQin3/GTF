@@ -45,16 +45,16 @@ func CompileStdGoPkg(pkgName string) {
 }
 
 // Compile all go files in a subdir of the dir drivers to a pkg
-// and put the pkg to the pkgloc
-func CompileMultiFilesPkg(dirName, pkgLoc string) {
+// and put the pkg to the pkgLocation
+func CompileMultiFilesPkg(dirName, pkgLocation string) {
 	files, _ := filepath.Glob(fmt.Sprintf("../%s/*.go", dirName))
 	input := strings.Join(files, " ")
-	ExecOSCmd("go tool %sg -o %s%s.a -I %s -pack %s", ProcessorLevel, pkgLoc, dirName, GoPkgDir, input)
+	ExecOSCmd("go tool %sg -o %s%s.a -I %s -pack %s", ProcessorLevel, pkgLocation, dirName, GoPkgDir, input)
 }
 
 // CompileGoFile compiles packages with only single go file.
 // The subdir MUST be the dir name in the $GOPATH\src dir, such as tests, ...
-func CompileSingleFilePkg(fileName, fileDir, pkgLoc string) {
+func CompileSingleFilePkg(fileName, fileDir, pkgLocation string) {
 	var doComepile = true
 	var filePrefix = strings.TrimSuffix(fileName, ".go")
 	var pkgFileName = filePrefix + ".a"
@@ -67,7 +67,7 @@ func CompileSingleFilePkg(fileName, fileDir, pkgLoc string) {
 		}
 	}
 	if doComepile {
-		ExecOSCmd("go tool %sg -o %s%s -I %s -pack %s%s", ProcessorLevel, pkgLoc, pkgFileName, GoPkgDir, fileDir, fileName)
+		ExecOSCmd("go tool %sg -o %s%s -I %s -pack %s%s", ProcessorLevel, pkgLocation, pkgFileName, GoPkgDir, fileDir, fileName)
 	}
 }
 

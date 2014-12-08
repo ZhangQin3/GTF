@@ -159,22 +159,22 @@ func Debugf(format string, v ...interface{}) {
 }
 
 // --------------------------------
-func ReopenFile() {
-	if log == nil {
+func (l *Logger) ReopenFile() {
+	if l == nil {
 		panic("The Logger log is not initialized.")
 	}
-	logFile, err := os.OpenFile(log.fileName, os.O_RDWR|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile(l.fileName, os.O_RDWR|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)
 	}
-	log.file = logFile
+	l.file = logFile
 }
 
-func CloseFile() {
-	if log == nil {
+func (l *Logger) CloseFile() {
+	if l == nil {
 		panic("The Logger log is not initialized.")
 	}
-	log.file.Close()
+	l.file.Close()
 }
 
 func (l *Logger) GetFileName() string {

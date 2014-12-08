@@ -1,3 +1,5 @@
+// The test.go defines a Test struct which is used as an embedded field in test scripts to promote its methods for test scripts,
+// the method of Test struct will be called in test scripts.
 package gtf
 
 import (
@@ -6,29 +8,30 @@ import (
 	"reflect"
 )
 
-type paramsFlag bool
+type testParamsFlag bool
 
 const (
-	Overridable    paramsFlag = true
-	NonOverridable paramsFlag = false
+	Overridable    testParamsFlag = true // Overridable means the test parameters can be overrided by test suite parameters with same name.
+	NonOverridable testParamsFlag = false
 )
 
-type Test struct{ DDD string }
+type Test struct{ DemoVariable string }
 
-func (t *Test) DefineCase(tcid, tcDescr string) *tcDefinition {
-	tcdef := &tcDefinition{tcid: tcid, tcDescription: tcDescr}
-	tcDefinitions[tcid] = tcdef
-	return tcdef
-}
-
-func (t *Test) SetParam(param string, value interface{}, overridable ...paramsFlag) {
+// overridable parameter is just an optional param, not variadic.
+func (t *Test) SetParam(param string, value interface{}, overridable ...testParamsFlag) {
 	if len(overridable) > 1 {
-		panic("The overrideable parameter needs only ONE argument.")
+		panic("The overrideable parameter is just an optional param, not variadic.")
 	}
 
-	if _, ok := testParams[param]; !ok || (len(overridable) == 1 && overridable[0] == NonOverridable) {
+	if _, ok := testParams[param]; !ok || (len(overridable) == 1 && overridable[0] == Overridable) {
 		testParams[param] = value
 	}
+}
+
+func (t *Test) DefineCase(tcid, description string) *tcDefinition {
+	tcDef := &tcDefinition{tcid: tcid, description: description}
+	tcDefinitions[tcid] = tcDef
+	return tcDef
 }
 
 // Called by TestCaseProcedure in ths testcase scripts to run real tests,
@@ -37,25 +40,20 @@ func (t *Test) SetParam(param string, value interface{}, overridable ...paramsFl
 // params is other parameter(s), if any, of the method tcTestLogicMethod
 func (t *Test) ExecuteTestCase(tcTestLogicMethod interface{}, tcid string, params ...interface{}) {
 	defer func() {
-		logTcResult(currentTestScript.logger, tcid, tcDefinitions[tcid].tcDescription)
+		logTcResult(currentTestScript.logger, tcid, tcDefinitions[tcid].description)
 	}()
 
-	fmt.Println("[STEP] FROM GTF's <<ExecuteTestCase>>")
-	if tcdef, ok := tcDefinitions[tcid]; ok {
-		if !tcdef.a {
-			fmt.Println("[ERROR] The testcase is not applicable.")
-			return
-		}
-		if !tcdef.r {
-			fmt.Println("[ERROR] The testcase's requirements are not be satisfied.")
+	if tcDef, ok := tcDefinitions[tcid]; ok {
+		if !tcDef.CalculateAppliability() {
 			return
 		}
 	} else {
-		// The testcase is not defined.
 		fmt.Println("[ERROR] The testcase is not defined.")
 		return
 	}
-	logTcHearder(currentTestScript.logger, tcid, tcDefinitions[tcid].tcDescription)
+
+	logTcHeader(currentTestScript.logger, tcid, tcDefinitions[tcid].description)
+
 	tc := newTestCase(tcTestLogicMethod, tcid, &params)
 	tc.runTcMethod()
 }

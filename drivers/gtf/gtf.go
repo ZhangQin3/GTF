@@ -59,7 +59,7 @@ func initTestScript(scriptFileName string, tTest interface{}, ts *tsuite.TSuite)
 	testParams = ts.SuiteParams
 	ts.CaseSetup()
 
-	logTsHearder(currentTestScript.logger, scriptFileName)
+	logTsHeader(currentTestScript.logger, scriptFileName)
 }
 
 func cleanupTestScript(ts *tsuite.TSuite) {
