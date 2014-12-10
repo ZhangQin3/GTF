@@ -73,12 +73,12 @@ func logFailAtTail(logger *log.Logger, v ...interface{}) {
 }
 
 /* Here only input failedStps, if failedStps != "" indicates there is some error happened. */
-func generateTcResultSummary(logger *log.Logger, tcid, tcDescr, failedStps string) bytes.Buffer {
+func generateTcResultSummary(logger *log.Logger, tcid, tcDescription, failedSteps string) bytes.Buffer {
 	data := log.TcResultSummary{
 		tcid,
-		tcDescr,
-		failedStps == "",
-		failedStps,
+		tcDescription,
+		failedSteps == "",
+		failedSteps,
 	}
 	var buf bytes.Buffer
 	if err := logger.GetTemplate().ExecuteTemplate(&buf, "RESULT_SUMMARY", data); err != nil {

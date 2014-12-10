@@ -1,7 +1,7 @@
 package ts
 
 type Suite struct {
-	Schema      string
+	Scheme      string
 	SuiteParams map[string]interface{}
 }
 
