@@ -24,18 +24,18 @@ type Logger struct {
 	metaIndex   map[string]string
 }
 
-type TcHeaderInfo struct {
+type TestcaseHdrInfo struct {
 	TcID string
 	Time string
 	Text string
 }
 
-type TsHeaderInfo struct {
+type TestScriptHdrInfo struct {
 	Time string
 	Text string
 }
 
-type TcResultSummary struct {
+type TestcaseResultSummary struct {
 	TcID        string
 	Description string
 	Result      bool
@@ -87,7 +87,7 @@ func (l *Logger) Output(level string, flags flags, info interface{}) {
 	case stepInfo:
 		l.text = v.Text
 		data = v
-	case TcHeaderInfo, TsHeaderInfo:
+	case TestcaseHdrInfo, TestScriptHdrInfo:
 		data = v
 	default:
 		panic("Can't accept the info type.")
@@ -135,7 +135,7 @@ func (l *Logger) CloseFile() {
 	l.file.Close()
 }
 
-func (l *Logger) GetFileName() string {
+func (l *Logger) FileName() string {
 	return l.fileName
 }
 

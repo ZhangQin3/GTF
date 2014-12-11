@@ -1,11 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"gtf/drivers/common"
 	tsuite "gtf/testsuites/tsuite"
-	"io"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -14,7 +14,7 @@ import (
 
 // All the dir operations below are relative to %GOPATH%/src/gtf/drivers/compile/ directory
 
-type scriptSchema struct {
+type scriptScheme struct {
 	Script      string `json:",omitempty"`
 	Repetitions int    `json:",omitempty"`
 	Other       string `json:",omitempty"`
@@ -43,12 +43,12 @@ var (
 )
 
 func CompileTestScripts() {
-	scriptSchemas := decodeSuiteJson()
-	if len(scriptSchemas) == 0 {
-		panic("There is not any test script in the scriptSchemas.")
+	testSuiteScheme := decodeTestSuiteScheme()
+	if len(testSuiteScheme) == 0 {
+		panic("There is not any test script in the testSuiteScheme.")
 	}
 
-	for _, obj := range scriptSchemas {
+	for _, obj := range testSuiteScheme {
 		goFileName := obj.Script
 		fmt.Println(goFileName)
 		// Test file doex NOT exist.
@@ -121,20 +121,24 @@ func GenerateExecuteGoFile() {
 	common.ExecOSCmd(`gofmt -w ../execute/execute.go`)
 }
 
-func decodeSuiteJson() []scriptSchema {
-	var suite = new(tsuite.TSuite)
-	var sch []scriptSchema
-	suite.SuiteSchema()
-	dec := json.NewDecoder(strings.NewReader(suite.Schema))
+func decodeTestSuiteScheme() []scriptScheme {
+	var tSuite = new(tsuite.TSuite)
+	var sch []scriptScheme
+	tSuite.SuiteScheme()
 
-	for {
-		var s scriptSchema
-		if err := dec.Decode(&s); err == io.EOF {
-			break
-		} else if err != nil {
-			panic(err)
+	regexpCommentLine := regexp.MustCompile(`^ *//`)
+	regexpNonNullLine := regexp.MustCompile(`\S+`)
+	scanner := bufio.NewScanner(strings.NewReader(tSuite.Scheme))
+	for scanner.Scan() {
+		bytes := scanner.Bytes()
+		if regexpNonNullLine.Match(bytes) && !regexpCommentLine.Match(bytes) {
+			var s scriptScheme
+			err := json.Unmarshal(bytes, &s)
+			if err != nil {
+				panic(err)
+			}
+			sch = append(sch, s)
 		}
-		sch = append(sch, s)
 	}
 	return sch
 }

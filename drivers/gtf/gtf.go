@@ -5,7 +5,6 @@ import (
 	"gtf/drivers/common"
 	"gtf/log"
 	tsuite "gtf/testsuites/tsuite"
-	"os"
 	"reflect"
 	"strconv"
 	"time"
@@ -51,15 +50,15 @@ func initTestSuite() *tsuite.TSuite {
 
 func initTestScript(scriptFileName string, tTest interface{}, ts *tsuite.TSuite) {
 	currentTestScript = nil
-	logFileName, logger := initTestLogFile(scriptFileName)
+	logger := initTestScriptLogger(scriptFileName)
 	Test := reflect.ValueOf(tTest)
-	currentTestScript = &testScript{scriptName: scriptFileName, tTest: &Test, logger: logger, logFileName: logFileName}
+	currentTestScript = &testScript{scriptName: scriptFileName, tTest: &Test, logger: logger, logFileName: logger.FileName()}
 
 	/* Initialize test execution params from the testsuite Params. */
 	testParams = ts.SuiteParams
 	ts.CaseSetup()
 
-	logTsHeader(currentTestScript.logger, scriptFileName)
+	logTestScriptHeader(currentTestScript.logger, scriptFileName)
 }
 
 func cleanupTestScript(ts *tsuite.TSuite) {
@@ -103,16 +102,9 @@ func runTestCases(scriptFileName string) (err error) {
 	return nil
 }
 
-func initTestLogFile(testFileName string) (string, *log.Logger) {
-	logFileName := testFileName + "." + strconv.FormatInt(time.Now().Unix(), 10) + ".html"
-	copy := "copy"
-	if os.Getenv("OSTYPE") == "linux" {
-		copy = `cp`
-		common.ExecOSCmd(`%s ../src/gtf/drivers/log/tmpl/header.html %s`, copy, logFileName)
-	} else {
-		common.ExecOSCmd(`%s ..\src\gtf\drivers\log\tmpl\header.html %s`, copy, logFileName)
-	}
-	logger := log.NewLogger(logFileName, `../src/gtf/drivers/log/tmpl/t1.tmpl`)
+func initTestScriptLogger(testFileName string) *log.Logger {
+	logFile := testFileName + "." + strconv.FormatInt(time.Now().Unix(), 10) + ".html"
+	common.CopyFile(`..\src\gtf\drivers\log\tmpl\header.html`, logFile)
 
-	return logFileName, logger
+	return log.NewLogger(logFile, `..\src\gtf\drivers\log\tmpl\t1.tmpl`)
 }

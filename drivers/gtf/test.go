@@ -40,7 +40,7 @@ func (t *Test) DefineCase(tcid, description string) *tcDefinition {
 // params is other parameter(s), if any, of the method tcTestLogicMethod
 func (t *Test) ExecuteTestCase(tcTestLogicMethod interface{}, tcid string, params ...interface{}) {
 	defer func() {
-		logTcResult(currentTestScript.logger, tcid, tcDefinitions[tcid].description)
+		logTestCaseResult(currentTestScript.logger, tcid, tcDefinitions[tcid].description)
 	}()
 
 	if tcDef, ok := tcDefinitions[tcid]; ok {
@@ -52,7 +52,7 @@ func (t *Test) ExecuteTestCase(tcTestLogicMethod interface{}, tcid string, param
 		return
 	}
 
-	logTcHeader(currentTestScript.logger, tcid, tcDefinitions[tcid].description)
+	logTestCaseHeader(currentTestScript.logger, tcid, tcDefinitions[tcid].description)
 
 	tc := newTestCase(tcTestLogicMethod, tcid, &params)
 	tc.runTcMethod()

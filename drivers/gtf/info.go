@@ -15,26 +15,26 @@ func clearTcSteps(l *log.Logger) {
 }
 
 /* Log a test script information in the report file. */
-func logTsHeader(logger *log.Logger, pkgName string) {
+func logTestScriptHeader(logger *log.Logger, pkgName string) {
 	logger.Output("TS_HEADING",
 		log.LOnlyFile,
-		log.TsHeaderInfo{
+		log.TestScriptHdrInfo{
 			time.Now().String(),
 			pkgName,
 		})
 }
 
-func logTcHeader(logger *log.Logger, tcid, tcDescr string) {
+func logTestCaseHeader(logger *log.Logger, tcid, tcDescr string) {
 	logger.Output("TC_HEADING",
 		log.LOnlyFile,
-		log.TcHeaderInfo{
+		log.TestcaseHdrInfo{
 			tcid,
 			time.Now().Format("2006-01-02 15:04:05"),
 			tcDescr,
 		})
 }
 
-func logTcResult(logger *log.Logger, tcid, tcDescription string) {
+func logTestCaseResult(logger *log.Logger, tcid, tcDescription string) {
 	var FaildSteps string
 	defer clearTcSteps(logger)
 
@@ -44,37 +44,37 @@ func logTcResult(logger *log.Logger, tcid, tcDescription string) {
 		}
 	}
 	if FaildSteps != "" {
-		logFailAtTail(logger, FaildSteps)
+		logFailedSteps(logger, FaildSteps)
 	}
 	tcSummaryResult := generateTcResultSummary(logger, tcid, tcDescription, FaildSteps)
 
 	/* TODO: enhance it if possible. */
 	logger.CloseFile()
-	logFileContent, err := ioutil.ReadFile(logger.GetFileName())
+	logFileContent, err := ioutil.ReadFile(logger.FileName())
 	if err != nil {
 		panic(err)
 	}
 	regexpInsertTcSummary := regexp.MustCompile(`<div style="display:none">hide</div>`)
 	logFileContent = regexpInsertTcSummary.ReplaceAll(logFileContent, tcSummaryResult.Bytes())
-	ioutil.WriteFile(logger.GetFileName(), logFileContent, 0666)
+	ioutil.WriteFile(logger.FileName(), logFileContent, 0666)
 	logger.ReopenFile()
 }
 
-func logHorizon(logger *log.Logger) {
+func logHorizonLine(logger *log.Logger) {
 	logger.Output("HORIZON", log.LOnlyFile, nil)
 }
 
-func logStack(logger *log.Logger, buf []byte) {
+func logStackTrace(logger *log.Logger, buf []byte) {
 	logger.Output("PANIC", log.LFileAndConsole, fmt.Sprintf("%s\n", buf))
 }
 
-func logFailAtTail(logger *log.Logger, v ...interface{}) {
+func logFailedSteps(logger *log.Logger, v ...interface{}) {
 	logger.Output("D_FAIL", log.LFileAndConsole, fmt.Sprint(v...))
 }
 
 /* Here only input failedStps, if failedStps != "" indicates there is some error happened. */
 func generateTcResultSummary(logger *log.Logger, tcid, tcDescription, failedSteps string) bytes.Buffer {
-	data := log.TcResultSummary{
+	data := log.TestcaseResultSummary{
 		tcid,
 		tcDescription,
 		failedSteps == "",

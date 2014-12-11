@@ -53,12 +53,12 @@ func (tc *testCase) runTcMethod() {
 			log.Error(err)
 			var buf []byte = make([]byte, 1500)
 			runtime.Stack(buf, true)
-			logStack(currentTestScript.logger, buf)
+			logStackTrace(currentTestScript.logger, buf)
 
 			/* Call testcase cleanup on crash methed if testcase method of cleanup method panics. */
 			if !cleanupCalledFlag {
 				/* In case the same following two line are not executed after tc.tcMethod.Call(*tc.tcMParams). */
-				logHorizon(currentTestScript.logger)
+				logHorizonLine(currentTestScript.logger)
 				currentTestScript.logger.GenerateStep("PostTest", "PostTest")
 			}
 			tc.callCleanupOnCrashMethod()
@@ -71,7 +71,7 @@ func (tc *testCase) runTcMethod() {
 	/* Call testcase cleanup method if there is not panic in the procedure of testcase method
 	   if there is panic in the testcase method the cleanup method will not be called.*/
 	cleanupCalledFlag = true
-	logHorizon(currentTestScript.logger)
+	logHorizonLine(currentTestScript.logger)
 	currentTestScript.logger.GenerateStep("PostTest", "PostTest")
 	tc.callCleanupMethod()
 }
@@ -82,7 +82,7 @@ func (tc *testCase) callCleanupOnCrashMethod() {
 			log.Error(err)
 			var buf []byte = make([]byte, 1500)
 			runtime.Stack(buf, true)
-			logStack(currentTestScript.logger, buf)
+			logStackTrace(currentTestScript.logger, buf)
 		}
 	}()
 	tc.callMethod("CleanupOnCrash")
@@ -94,7 +94,7 @@ func (tc *testCase) callCleanupMethod() {
 			log.Error(err)
 			var buf []byte = make([]byte, 1500)
 			runtime.Stack(buf, true)
-			logStack(currentTestScript.logger, buf)
+			logStackTrace(currentTestScript.logger, buf)
 		}
 	}()
 	tc.callMethod("Cleanup")
