@@ -42,6 +42,12 @@ type TestcaseResultSummary struct {
 	FailedSteps string
 }
 
+type stepInfo struct {
+	Index string
+	Time  string
+	Text  string
+}
+
 type flags int
 
 const (

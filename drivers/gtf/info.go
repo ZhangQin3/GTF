@@ -35,18 +35,18 @@ func logTestCaseHeader(logger *log.Logger, tcid, tcDescr string) {
 }
 
 func logTestCaseResult(logger *log.Logger, tcid, tcDescription string) {
-	var FaildSteps string
+	var faildSteps string
 	defer clearTcSteps(logger)
 
 	for _, step := range logger.Steps {
 		if step.IsFailed {
-			FaildSteps = FaildSteps + "{" + step.StepIndex + "} "
+			faildSteps = faildSteps + "{" + step.Index + "} "
 		}
 	}
-	if FaildSteps != "" {
-		logFailedSteps(logger, FaildSteps)
+	if faildSteps != "" {
+		logFailedSteps(logger, faildSteps)
 	}
-	tcSummaryResult := generateTcResultSummary(logger, tcid, tcDescription, FaildSteps)
+	tcSummaryResult := generateTcResultSummary(logger, tcid, tcDescription, faildSteps)
 
 	/* TODO: enhance it if possible. */
 	logger.CloseFile()
