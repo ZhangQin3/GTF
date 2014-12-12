@@ -1,7 +1,6 @@
 package verify
 
 import (
-	"fmt"
 	"gtf"
 	"gtf/log"
 	"webgui"
@@ -35,7 +34,7 @@ func (t *Test) VerifyPrototype(tcid string) {
 
 	// p.WanSetup().Click()
 
-	webgui.OpenWanSetup(p.WD)
+	webgui.OpenWanSetup(p)
 	// k, v := p.WanSetup().Text()
 	// k, v = p.WanSetup().TagName()
 	// fmt.Println("------------>>>>>>>>>>>>>>>>>>>>>>=====", k, v)
