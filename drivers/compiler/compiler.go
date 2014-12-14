@@ -22,7 +22,7 @@ type scriptScheme struct {
 
 func main() {
 	compileGtfPkg()
-	common.CompileStdGoPkg("webgui")
+	common.CompileStdGoPkg("gse")
 	CompileTestScripts()
 	CompileExecuteGoFile("execute.go")
 

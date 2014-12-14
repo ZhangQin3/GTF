@@ -7,6 +7,7 @@ import (
 func main() {
 	compileGtfCompiler()
 	CompileGtf()
+	// RunExecute()
 }
 
 func compileGtfCompiler() {
@@ -19,4 +20,8 @@ func compileGtfCompiler() {
 
 func CompileGtf() {
 	common.ExecOSCmd("%scompiler.exe", common.GoPkgDir)
+}
+
+func RunExecute() {
+	common.ExecOSCmd("%sexecute.exe", common.GoBinDir)
 }

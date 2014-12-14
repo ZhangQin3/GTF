@@ -1,9 +1,9 @@
 package verify
 
 import (
+	"gse"
 	"gtf"
 	"gtf/log"
-	"webgui"
 )
 
 type Test struct{ gtf.Test }
@@ -25,16 +25,23 @@ func (t *Test) TestCaseProcedure() {
 
 /* --------------- Test Procedure --------------- */
 func (t *Test) VerifyPrototype(tcid string) {
-	log.Step(".", "Login the WebGui.")
+	log.Step(1, "Login the WebGui.")
 	// p := new(webgui.GWTWLoginPage)
-	p := webgui.OpenLoginPage()
+	p := gse.OpenLoginPage()
+
+	log.Step(2, "Input user name.")
 	p.UserName().SetText("technician")
+
+	log.Step(3, "Input user password.")
 	p.Passord().SetText("T!m3W4rn3rC4bl3")
+
+	log.Step(4, "Apply inputs.")
 	p.Apply().Click()
 
 	// p.WanSetup().Click()
 
-	webgui.OpenWanSetup(p)
+	log.Step(5, "Goto wan setup page.")
+	gse.OpenWanSetup(p)
 	// k, v := p.WanSetup().Text()
 	// k, v = p.WanSetup().TagName()
 	// fmt.Println("------------>>>>>>>>>>>>>>>>>>>>>>=====", k, v)
