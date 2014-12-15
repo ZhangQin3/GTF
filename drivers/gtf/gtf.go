@@ -18,21 +18,20 @@ type testSuiteSchema struct {
 /* Global variable(s) exported. */
 var (
 	TestSuiteSchema testSuiteSchema
+	TestParams      = make(map[string]interface{}) /* The map uased to lay params inherited from testsuite and set from the testcase.. */
 )
 
 /* Contains the data for each test script */
 type testScript struct {
-	scriptName  string         /* test script name without suffix. */
-	tTest       *reflect.Value /* the the pointer to the instance of the Test struct in the test script */
-	logger      *log.Logger    /* logger for each test script.  */
-	logFileName string         /* log file name. */
+	fileName string         /* test script file name without suffix(.go). */
+	tTest    *reflect.Value /* the the pointer to the instance of the Test struct in the test script */
+	logger   *log.Logger    /* logger for each test script.  */
 }
 
 /* Global variable(s) NOT exported. */
 var (
 	currentTestScript *testScript
 	tcDefinitions     = make(map[string]*tcDefinition) /* The testcase defined in the method CaseDefinitions in the test script, the key is string tcid.. */
-	testParams        = make(map[string]interface{})   /* The map uased to lay params inherited from testsuite and set from the testcase.. */
 )
 
 func GtfMain() {
@@ -49,16 +48,12 @@ func initTestSuite() *tsuite.TSuite {
 }
 
 func initTestScript(scriptFileName string, tTest interface{}, ts *tsuite.TSuite) {
-	currentTestScript = nil
-	logger := initTestScriptLogger(scriptFileName)
-	Test := reflect.ValueOf(tTest)
-	currentTestScript = &testScript{scriptName: scriptFileName, tTest: &Test, logger: logger, logFileName: logger.FileName()}
+	currentTestScript = newTestScript(scriptFileName, tTest)
+	logTestScriptHeader(currentTestScript)
 
 	/* Initialize test execution params from the testsuite Params. */
-	testParams = ts.SuiteParams
+	TestParams = ts.SuiteParams
 	ts.CaseSetup()
-
-	logTestScriptHeader(currentTestScript.logger, scriptFileName)
 }
 
 func cleanupTestScript(ts *tsuite.TSuite) {
@@ -100,6 +95,12 @@ func runTestCases(scriptFileName string) (err error) {
 		tp.Call(nil)
 	}
 	return nil
+}
+
+func newTestScript(scriptFileName string, tTest interface{}) *testScript {
+	logger := initTestScriptLogger(scriptFileName)
+	test := reflect.ValueOf(tTest)
+	return &testScript{fileName: scriptFileName, tTest: &test, logger: logger}
 }
 
 func initTestScriptLogger(testFileName string) *log.Logger {

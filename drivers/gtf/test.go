@@ -23,8 +23,8 @@ func (t *Test) SetParam(param string, value interface{}, overridable ...testPara
 		panic("The overrideable parameter is just an optional param, not variadic.")
 	}
 
-	if _, ok := testParams[param]; !ok || (len(overridable) == 1 && overridable[0] == Overridable) {
-		testParams[param] = value
+	if _, ok := TestParams[param]; !ok || (len(overridable) == 1 && overridable[0] == Overridable) {
+		TestParams[param] = value
 	}
 }
 

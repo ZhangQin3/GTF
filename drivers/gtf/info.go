@@ -15,12 +15,13 @@ func clearTcSteps(l *log.Logger) {
 }
 
 /* Log a test script information in the report file. */
-func logTestScriptHeader(logger *log.Logger, pkgName string) {
-	logger.Output("TS_HEADING",
+// func logTestScriptHeader(logger *log.Logger, pkgName string) {
+func logTestScriptHeader(script *testScript) {
+	script.logger.Output("TS_HEADING",
 		log.LOnlyFile,
 		log.TestScriptHdrInfo{
 			time.Now().String(),
-			pkgName,
+			script.fileName,
 		})
 }
 
