@@ -5,61 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"gtf/log"
-	"io/ioutil"
-	"regexp"
-	"time"
 )
-
-func clearTcSteps(l *log.Logger) {
-	l.Steps = l.Steps[0:0]
-}
-
-/* Log a test script information in the report file. */
-// func logTestScriptHeader(logger *log.Logger, pkgName string) {
-func logTestScriptHeader(script *testScript) {
-	script.logger.Output("TS_HEADING",
-		log.LOnlyFile,
-		log.TestScriptHdrInfo{
-			time.Now().String(),
-			script.fileName,
-		})
-}
-
-func logTestCaseHeader(logger *log.Logger, tcid, tcDescr string) {
-	logger.Output("TC_HEADING",
-		log.LOnlyFile,
-		log.TestcaseHdrInfo{
-			tcid,
-			time.Now().Format("2006-01-02 15:04:05"),
-			tcDescr,
-		})
-}
-
-func logTestCaseResult(logger *log.Logger, tcid, tcDescription string) {
-	var faildSteps string
-	defer clearTcSteps(logger)
-
-	for _, step := range logger.Steps {
-		if step.IsFailed {
-			faildSteps = faildSteps + "{" + step.Index + "} "
-		}
-	}
-	if faildSteps != "" {
-		logFailedSteps(logger, faildSteps)
-	}
-	tcSummaryResult := generateTcResultSummary(logger, tcid, tcDescription, faildSteps)
-
-	/* TODO: enhance it if possible. */
-	logger.CloseFile()
-	logFileContent, err := ioutil.ReadFile(logger.FileName())
-	if err != nil {
-		panic(err)
-	}
-	regexpInsertTcSummary := regexp.MustCompile(`<div style="display:none">hide</div>`)
-	logFileContent = regexpInsertTcSummary.ReplaceAll(logFileContent, tcSummaryResult.Bytes())
-	ioutil.WriteFile(logger.FileName(), logFileContent, 0666)
-	logger.ReopenFile()
-}
 
 func logHorizonLine(logger *log.Logger) {
 	logger.Output("HORIZON", log.LOnlyFile, nil)

@@ -2,13 +2,17 @@ package gtf
 
 import (
 	"gtf/log"
+	"io/ioutil"
 	"reflect"
 	"regexp"
 	"runtime"
+	"time"
 )
 
 /* Contains the data for each testcase in a specfic test script. */
 type testCase struct {
+	tcID          string
+	description   string
 	method        reflect.Value    /* reflect method of testcase method. */
 	methodParams  *[]reflect.Value /* params of the testcase method. */
 	methodName    string           /* method name of the testcase method. */
@@ -32,6 +36,8 @@ func newTestCase(tcTestLogicMethod interface{}, tcid string, params *[]interface
 	}
 	tc.method = tp
 	tc.methodName = funcName
+	tc.tcID = tcid
+	tc.description = tcDefinitions[tcid].description
 
 	paramsLen := len(*params)
 	tcMParams = make([]reflect.Value, paramsLen+1)
@@ -119,4 +125,45 @@ func getFunctionName(rv reflect.Value) (string, string) {
 		panic("The qualified function name: " + qualifiedFuncName + `does NOT match the regexp: \w+.*?\w+.(\w)·fm.`)
 	}
 	return matchs[1], matchs[2]
+}
+
+func clearTcSteps(l *log.Logger) {
+	l.Steps = l.Steps[0:0]
+}
+
+func (tc *testCase) logHeader() {
+	tc.testScript.logger.Output("TC_HEADING",
+		log.LOnlyFile,
+		log.TestcaseHdrInfo{
+			tc.tcID,
+			time.Now().Format("2006-01-02 15:04:05"),
+			tc.description,
+		})
+}
+
+func (tc *testCase) logResult() {
+	var faildSteps string
+	var logger = tc.testScript.logger
+	defer clearTcSteps(logger)
+
+	for _, step := range logger.Steps {
+		if step.IsFailed {
+			faildSteps = faildSteps + "{" + step.Index + "} "
+		}
+	}
+	if faildSteps != "" {
+		logFailedSteps(logger, faildSteps)
+	}
+	tcSummaryResult := generateTcResultSummary(logger, tc.tcID, tc.description, faildSteps)
+
+	/* TODO: enhance it if possible. */
+	logger.CloseFile()
+	logFileContent, err := ioutil.ReadFile(logger.FileName())
+	if err != nil {
+		panic(err)
+	}
+	regexpInsertTcSummary := regexp.MustCompile(`<div style="display:none">hide</div>`)
+	logFileContent = regexpInsertTcSummary.ReplaceAll(logFileContent, tcSummaryResult.Bytes())
+	ioutil.WriteFile(logger.FileName(), logFileContent, 0666)
+	logger.ReopenFile()
 }

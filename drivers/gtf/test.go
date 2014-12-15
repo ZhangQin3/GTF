@@ -15,6 +15,10 @@ const (
 	NonOverridable testParamsFlag = false
 )
 
+var (
+	tcDefinitions = make(map[string]*tcDefinition) /* The testcase defined in the method CaseDefinitions in the test script, the key is string tcid.. */
+)
+
 type Test struct{ DemoVariable string }
 
 // overridable parameter is just an optional param, not variadic.
@@ -39,8 +43,10 @@ func (t *Test) DefineCase(tcid, description string) *tcDefinition {
 // tcid is the first parameter of the method tcTestLogicMethod
 // params is other parameter(s), if any, of the method tcTestLogicMethod
 func (t *Test) ExecuteTestCase(tcTestLogicMethod interface{}, tcid string, params ...interface{}) {
+	tc := newTestCase(tcTestLogicMethod, tcid, &params)
 	defer func() {
-		logTestCaseResult(currentTestScript.logger, tcid, tcDefinitions[tcid].description)
+		// logTestCaseResult(currentTestScript.logger, tcid, tcDefinitions[tcid].description)
+		tc.logResult()
 	}()
 
 	if tcDef, ok := tcDefinitions[tcid]; ok {
@@ -52,9 +58,10 @@ func (t *Test) ExecuteTestCase(tcTestLogicMethod interface{}, tcid string, param
 		return
 	}
 
-	logTestCaseHeader(currentTestScript.logger, tcid, tcDefinitions[tcid].description)
+	// logTestCaseHeader(currentTestScript.logger, tcid, tcDefinitions[tcid].description)
+	tc.logHeader()
 
-	tc := newTestCase(tcTestLogicMethod, tcid, &params)
+	// tc := newTestCase(tcTestLogicMethod, tcid, &params)
 	tc.runTcMethod()
 }
 

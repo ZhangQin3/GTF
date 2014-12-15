@@ -2,12 +2,9 @@ package gtf
 
 import (
 	"fmt"
-	"gtf/drivers/common"
 	"gtf/log"
 	tsuite "gtf/testsuites/tsuite"
 	"reflect"
-	"strconv"
-	"time"
 )
 
 type testSuiteSchema struct {
@@ -21,17 +18,9 @@ var (
 	TestParams      = make(map[string]interface{}) /* The map uased to lay params inherited from testsuite and set from the testcase.. */
 )
 
-/* Contains the data for each test script */
-type testScript struct {
-	fileName string         /* test script file name without suffix(.go). */
-	tTest    *reflect.Value /* the the pointer to the instance of the Test struct in the test script */
-	logger   *log.Logger    /* logger for each test script.  */
-}
-
 /* Global variable(s) NOT exported. */
 var (
 	currentTestScript *testScript
-	tcDefinitions     = make(map[string]*tcDefinition) /* The testcase defined in the method CaseDefinitions in the test script, the key is string tcid.. */
 )
 
 func GtfMain() {
@@ -49,7 +38,7 @@ func initTestSuite() *tsuite.TSuite {
 
 func initTestScript(scriptFileName string, tTest interface{}, ts *tsuite.TSuite) {
 	currentTestScript = newTestScript(scriptFileName, tTest)
-	logTestScriptHeader(currentTestScript)
+	currentTestScript.logHeader()
 
 	/* Initialize test execution params from the testsuite Params. */
 	TestParams = ts.SuiteParams
@@ -95,17 +84,4 @@ func runTestCases(scriptFileName string) (err error) {
 		tp.Call(nil)
 	}
 	return nil
-}
-
-func newTestScript(scriptFileName string, tTest interface{}) *testScript {
-	logger := initTestScriptLogger(scriptFileName)
-	test := reflect.ValueOf(tTest)
-	return &testScript{fileName: scriptFileName, tTest: &test, logger: logger}
-}
-
-func initTestScriptLogger(testFileName string) *log.Logger {
-	logFile := testFileName + "." + strconv.FormatInt(time.Now().Unix(), 10) + ".html"
-	common.CopyFile(`..\src\gtf\drivers\log\tmpl\header.html`, logFile)
-
-	return log.NewLogger(logFile, `..\src\gtf\drivers\log\tmpl\t1.tmpl`)
 }
