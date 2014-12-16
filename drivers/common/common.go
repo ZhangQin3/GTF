@@ -13,16 +13,17 @@ import (
 )
 
 var (
-	GoPkgDir       = PkgDir()
-	GoPath         = os.Getenv("gopath")
-	ScriptsPkgDir  = PkgDir() + "gtf/scripts/"
-	ScriptsSrcDir  = GoPath + "src/gtf/scripts/"
-	TsPkgDir       = PkgDir() + "gtf/testsuites/"
-	TsSrcDir       = GoPath + "src/gtf/testsuites/"
-	GtfPkgDir      = PkgDir() + "gtf/"
-	GoBinDir       = GoPath + "bin/"
-	ProcessorLevel = os.Getenv("PROCESSOR_LEVEL")
-	DriversDir     = driversDir()
+	GoPkgDir         = PkgDir()
+	GoPath           = os.Getenv("gopath")
+	ScriptsPkgDir    = PkgDir() + "gtf/scripts/"
+	ScriptsSrcDir    = GoPath + "src/gtf/scripts/"
+	TsPkgDir         = PkgDir() + "gtf/testsuites/"
+	TsSrcDir         = GoPath + "src/gtf/testsuites/"
+	GtfPkgDir        = PkgDir() + "gtf/"
+	GoBinDir         = GoPath + "bin/"
+	GtfDriversPkgDir = PkgDir() + "gtf/drivers/"
+	ProcessorLevel   = os.Getenv("PROCESSOR_LEVEL")
+	DriversDir       = driversDir()
 )
 
 func init() {

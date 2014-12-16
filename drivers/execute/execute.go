@@ -1,23 +1,20 @@
 package main
 
 import (
-	test_verify_second "gtf/scripts/test_verify_second"
-	test_verify_test "gtf/scripts/test_verify_test"
+	test_verify_web "gtf/scripts/test_verify_web"
 )
 
 import (
-	"gtf"
+	"gtf/drivers/gtf"
 )
 
 func main() {
 	gtf.TestSuiteSchema.TestScripts = map[string]interface{}{
-		"test_verify_test":   new(test_verify_test.Test),
-		"test_verify_second": new(test_verify_second.Test),
+		"test_verify_web": new(test_verify_web.Test),
 	}
 
 	gtf.TestSuiteSchema.Repetitions = map[string]int{
-		"test_verify_test":   1,
-		"test_verify_second": 2,
+		"test_verify_web": 1,
 	}
 
 	gtf.GtfMain()

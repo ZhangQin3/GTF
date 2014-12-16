@@ -3,7 +3,7 @@ package main
 //Import Here
 
 import (
-	"gtf"
+	"gtf/drivers/gtf"
 )
 
 func main() {

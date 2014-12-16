@@ -2,7 +2,7 @@ package gtf
 
 import (
 	"gtf/drivers/common"
-	"gtf/log"
+	"gtf/drivers/log"
 	"reflect"
 	"strconv"
 	"time"
@@ -37,4 +37,13 @@ func (s *testScript) logHeader() {
 			time.Now().String(),
 			s.fileName,
 		})
+}
+
+/* fieldName is the field name of Test in test.go, tTest promotes them. */
+func (s *testScript) tTestField(fieldName string) reflect.Value {
+	return s.tTest.Elem().FieldByName(fieldName)
+}
+
+func (s *testScript) tcDefinitionField(tcid, fieldName string) string {
+	return s.tTest.Elem().FieldByName("tcDefinitions").MapIndex(reflect.ValueOf(tcid)).Elem().FieldByName(fieldName).String()
 }

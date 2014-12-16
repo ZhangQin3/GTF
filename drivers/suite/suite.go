@@ -1,4 +1,4 @@
-package ts
+package suite
 
 type Suite struct {
 	Scheme      string

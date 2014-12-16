@@ -2,7 +2,7 @@ package gtf
 
 import (
 	"fmt"
-	"gtf/log"
+	"gtf/drivers/log"
 	tsuite "gtf/testsuites/tsuite"
 	"reflect"
 )
@@ -12,15 +12,10 @@ type testSuiteSchema struct {
 	Repetitions map[string]int
 }
 
-/* Global variable(s) exported. */
 var (
 	TestSuiteSchema testSuiteSchema
-	TestParams      = make(map[string]interface{}) /* The map uased to lay params inherited from testsuite and set from the testcase.. */
-)
-
-/* Global variable(s) NOT exported. */
-var (
-	currentTestScript *testScript
+	TestParams      = make(map[string]interface{}) /* TestParams uased to store params inherited from testsuite and set from the current test script. */
+	currentScript   *testScript
 )
 
 func GtfMain() {
@@ -37,17 +32,17 @@ func initTestSuite() *tsuite.TSuite {
 }
 
 func initTestScript(scriptFileName string, tTest interface{}, ts *tsuite.TSuite) {
-	currentTestScript = newTestScript(scriptFileName, tTest)
-	currentTestScript.logHeader()
+	currentScript = newTestScript(scriptFileName, tTest)
+	currentScript.logHeader()
 
-	/* Initialize test execution params from the testsuite Params. */
+	/* Initialize TestParams from testsuite SuiteParams. */
 	TestParams = ts.SuiteParams
 	ts.CaseSetup()
 }
 
 func cleanupTestScript(ts *tsuite.TSuite) {
 	/* Call test script level Cleanup method. */
-	tcpCleanup := currentTestScript.tTest.MethodByName("TestCaseProcedureCleanup")
+	tcpCleanup := currentScript.tTest.MethodByName("TestCaseProcedureCleanup")
 	if tcpCleanup.Kind() == reflect.Func {
 		tcpCleanup.Call(nil)
 	}
@@ -67,10 +62,10 @@ func runTestScripts(ts *tsuite.TSuite) {
 }
 
 func runTestCases(scriptFileName string) (err error) {
-	currentTestScript.tTest.MethodByName("SetTestParams").Call(nil)
-	if csDef := currentTestScript.tTest.MethodByName("CaseDefinitions"); csDef.IsValid() {
+	currentScript.tTest.MethodByName("SetTestParams").Call(nil)
+	if tcDef := currentScript.tTest.MethodByName("CaseDefinitions"); tcDef.IsValid() {
 		/* The global variable tcDefs will be filled here. */
-		csDef.Call(nil)
+		tcDef.Call(nil)
 	} else {
 		/* None testcase is defined. Log a message in the log file, and stop execute the testscript. */
 		log.Error("[ERROR] No testcase defined in the script.")
@@ -80,7 +75,7 @@ func runTestCases(scriptFileName string) (err error) {
 	/* Execute TestCaseProcedure, in the method TestCaseProcedure the function ExecuteTestCase
 	   will be called to execute each test procedure for each testcase via executing Test.ExecuteTestCase method. */
 	for i := 0; i < TestSuiteSchema.Repetitions[scriptFileName]; i++ {
-		tp := currentTestScript.tTest.MethodByName("TestCaseProcedure")
+		tp := currentScript.tTest.MethodByName("TestCaseProcedure")
 		tp.Call(nil)
 	}
 	return nil

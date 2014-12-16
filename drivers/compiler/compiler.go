@@ -31,9 +31,10 @@ func main() {
 }
 
 func compileGtfPkg() {
-	common.CompileStdGoPkg("gtf/drivers/common")
-	common.CompileMultiFilesPkg("log", common.GtfPkgDir)
-	common.CompileMultiFilesPkg("gtf", common.GoPkgDir)
+	common.CompileStdGoPkg("gtf/drivers/log")
+	// common.CompileStdGoPkg("gtf/drivers/gtf")
+	// common.CompileMultiFilesPkg("log", common.GtfPkgDir)
+	common.CompileMultiFilesPkg("gtf", common.GtfDriversPkgDir)
 }
 
 var (

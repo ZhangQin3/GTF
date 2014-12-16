@@ -1,7 +1,9 @@
 package gtf
 
 import (
-	"gtf/log"
+	"bytes"
+	"fmt"
+	"gtf/drivers/log"
 	"io/ioutil"
 	"reflect"
 	"regexp"
@@ -11,7 +13,7 @@ import (
 
 /* Contains the data for each testcase in a specfic test script. */
 type testCase struct {
-	tcID          string
+	tcid          string
 	description   string
 	method        reflect.Value    /* reflect method of testcase method. */
 	methodParams  *[]reflect.Value /* params of the testcase method. */
@@ -21,13 +23,13 @@ type testCase struct {
 	testScript    *testScript
 }
 
-// tcTestLogicMethod is the real test method with test logic
-// tcid is the first parameter of the method tcTestLogicMethod
-// params is other parameter(s), if any, of the method tcTestLogicMethod
+// tcTestLogicMethod: the real test method with test case's test logic
+// tcid: the first parameter of the method tcTestLogicMethod
+// params: other parameter(s)of the method tcTestLogicMethod, if any
 func newTestCase(tcTestLogicMethod interface{}, tcid string, params *[]interface{}) *testCase {
 	var tcMParams []reflect.Value
 	var tc testCase
-	tc.testScript = currentTestScript
+	tc.testScript = currentScript
 	tp := reflect.ValueOf(tcTestLogicMethod)
 	_, funcName := getFunctionName(tp)
 
@@ -36,8 +38,8 @@ func newTestCase(tcTestLogicMethod interface{}, tcid string, params *[]interface
 	}
 	tc.method = tp
 	tc.methodName = funcName
-	tc.tcID = tcid
-	tc.description = tcDefinitions[tcid].description
+	tc.tcid = tcid
+	tc.description = tc.testScript.tcDefinitionField(tcid, "description")
 
 	paramsLen := len(*params)
 	tcMParams = make([]reflect.Value, paramsLen+1)
@@ -54,31 +56,32 @@ func newTestCase(tcTestLogicMethod interface{}, tcid string, params *[]interface
 func (tc *testCase) runTcMethod() {
 	/* Catch exeptions in the test method body, if any, in the test method. */
 	var cleanupCalledFlag bool = false
+	var logger = tc.testScript.logger
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error(err)
 			var buf []byte = make([]byte, 1500)
 			runtime.Stack(buf, true)
-			logStackTrace(currentTestScript.logger, buf)
+			tc.logStackTrace(buf)
 
 			/* Call testcase cleanup on crash methed if testcase method of cleanup method panics. */
 			if !cleanupCalledFlag {
 				/* In case the same following two line are not executed after tc.tcMethod.Call(*tc.tcMParams). */
-				logHorizonLine(currentTestScript.logger)
-				currentTestScript.logger.GenerateStep("PostTest", "PostTest")
+				tc.logHorizonLine()
+				logger.GenerateStep("PostTest", "PostTest")
 			}
 			tc.callCleanupOnCrashMethod()
 		}
 	}()
 	/* Add PRE-FIRST-STEP in case error occurs before first step. */
-	currentTestScript.logger.GenerateStep("PreTest", "PreTest")
+	logger.GenerateStep("PreTest", "PreTest")
 	/* Call testcase method. */
 	tc.method.Call(*tc.methodParams)
 	/* Call testcase cleanup method if there is not panic in the procedure of testcase method
 	   if there is panic in the testcase method the cleanup method will not be called.*/
 	cleanupCalledFlag = true
-	logHorizonLine(currentTestScript.logger)
-	currentTestScript.logger.GenerateStep("PostTest", "PostTest")
+	tc.logHorizonLine()
+	logger.GenerateStep("PostTest", "PostTest")
 	tc.callCleanupMethod()
 }
 
@@ -88,7 +91,7 @@ func (tc *testCase) callCleanupOnCrashMethod() {
 			log.Error(err)
 			var buf []byte = make([]byte, 1500)
 			runtime.Stack(buf, true)
-			logStackTrace(currentTestScript.logger, buf)
+			tc.logStackTrace(buf)
 		}
 	}()
 	tc.callMethod("CleanupOnCrash")
@@ -100,7 +103,7 @@ func (tc *testCase) callCleanupMethod() {
 			log.Error(err)
 			var buf []byte = make([]byte, 1500)
 			runtime.Stack(buf, true)
-			logStackTrace(currentTestScript.logger, buf)
+			tc.logStackTrace(buf)
 		}
 	}()
 	tc.callMethod("Cleanup")
@@ -127,24 +130,12 @@ func getFunctionName(rv reflect.Value) (string, string) {
 	return matchs[1], matchs[2]
 }
 
-func clearTcSteps(l *log.Logger) {
-	l.Steps = l.Steps[0:0]
-}
-
-func (tc *testCase) logHeader() {
-	tc.testScript.logger.Output("TC_HEADING",
-		log.LOnlyFile,
-		log.TestcaseHdrInfo{
-			tc.tcID,
-			time.Now().Format("2006-01-02 15:04:05"),
-			tc.description,
-		})
-}
-
 func (tc *testCase) logResult() {
 	var faildSteps string
 	var logger = tc.testScript.logger
-	defer clearTcSteps(logger)
+	defer func() {
+		logger.Steps = logger.Steps[0:0]
+	}()
 
 	for _, step := range logger.Steps {
 		if step.IsFailed {
@@ -152,9 +143,9 @@ func (tc *testCase) logResult() {
 		}
 	}
 	if faildSteps != "" {
-		logFailedSteps(logger, faildSteps)
+		tc.logFailedSteps(faildSteps)
 	}
-	tcSummaryResult := generateTcResultSummary(logger, tc.tcID, tc.description, faildSteps)
+	tcSummaryResult := tc.testResultSummary(faildSteps)
 
 	/* TODO: enhance it if possible. */
 	logger.CloseFile()
@@ -166,4 +157,41 @@ func (tc *testCase) logResult() {
 	logFileContent = regexpInsertTcSummary.ReplaceAll(logFileContent, tcSummaryResult.Bytes())
 	ioutil.WriteFile(logger.FileName(), logFileContent, 0666)
 	logger.ReopenFile()
+}
+
+func (tc *testCase) logHeader() {
+	tc.testScript.logger.Output("TC_HEADING",
+		log.LOnlyFile,
+		log.TestcaseHdrInfo{
+			tc.tcid,
+			time.Now().Format("2006-01-02 15:04:05"),
+			tc.description,
+		})
+}
+
+/* Here only input failedStps, if failedStps != "" indicates there is some error happened. */
+func (tc *testCase) testResultSummary(failedSteps string) bytes.Buffer {
+	data := log.TestcaseResultSummary{
+		tc.tcid,
+		tc.description,
+		failedSteps == "",
+		failedSteps,
+	}
+	var buf bytes.Buffer
+	if err := tc.testScript.logger.GetTemplate().ExecuteTemplate(&buf, "RESULT_SUMMARY", data); err != nil {
+		panic(err)
+	}
+	return buf
+}
+
+func (tc *testCase) logFailedSteps(failedSteps string) {
+	tc.testScript.logger.Output("D_FAIL", log.LFileAndConsole, failedSteps)
+}
+
+func (tc *testCase) logStackTrace(buf []byte) {
+	tc.testScript.logger.Output("PANIC", log.LFileAndConsole, fmt.Sprintf("%s\n", buf))
+}
+
+func (tc *testCase) logHorizonLine() {
+	tc.testScript.logger.Output("HORIZON", log.LOnlyFile, nil)
 }

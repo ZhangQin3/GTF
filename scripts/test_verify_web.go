@@ -2,8 +2,8 @@ package verify
 
 import (
 	"gse"
-	"gtf"
-	"gtf/log"
+	"gtf/drivers/gtf"
+	"gtf/drivers/log"
 )
 
 type Test struct{ gtf.Test }

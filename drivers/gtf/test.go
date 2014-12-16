@@ -4,7 +4,7 @@ package gtf
 
 import (
 	"fmt"
-	"gtf/log"
+	"gtf/drivers/log"
 	"reflect"
 )
 
@@ -15,11 +15,10 @@ const (
 	NonOverridable testParamsFlag = false
 )
 
-var (
-	tcDefinitions = make(map[string]*tcDefinition) /* The testcase defined in the method CaseDefinitions in the test script, the key is string tcid.. */
-)
-
-type Test struct{ DemoVariable string }
+type Test struct {
+	tcDefinitions map[string]*tcDefinition
+	DemoVariable  string
+}
 
 // overridable parameter is just an optional param, not variadic.
 func (t *Test) SetParam(param string, value interface{}, overridable ...testParamsFlag) {
@@ -33,8 +32,11 @@ func (t *Test) SetParam(param string, value interface{}, overridable ...testPara
 }
 
 func (t *Test) DefineCase(tcid, description string) *tcDefinition {
+	if t.tcDefinitions == nil {
+		t.tcDefinitions = make(map[string]*tcDefinition)
+	}
 	tcDef := &tcDefinition{tcid: tcid, description: description}
-	tcDefinitions[tcid] = tcDef
+	t.tcDefinitions[tcid] = tcDef
 	return tcDef
 }
 
@@ -43,13 +45,12 @@ func (t *Test) DefineCase(tcid, description string) *tcDefinition {
 // tcid is the first parameter of the method tcTestLogicMethod
 // params is other parameter(s), if any, of the method tcTestLogicMethod
 func (t *Test) ExecuteTestCase(tcTestLogicMethod interface{}, tcid string, params ...interface{}) {
-	tc := newTestCase(tcTestLogicMethod, tcid, &params)
+	testcase := newTestCase(tcTestLogicMethod, tcid, &params)
 	defer func() {
-		// logTestCaseResult(currentTestScript.logger, tcid, tcDefinitions[tcid].description)
-		tc.logResult()
+		testcase.logResult()
 	}()
 
-	if tcDef, ok := tcDefinitions[tcid]; ok {
+	if tcDef, ok := t.tcDefinitions[tcid]; ok {
 		if !tcDef.CalculateAppliability() {
 			return
 		}
@@ -58,11 +59,8 @@ func (t *Test) ExecuteTestCase(tcTestLogicMethod interface{}, tcid string, param
 		return
 	}
 
-	// logTestCaseHeader(currentTestScript.logger, tcid, tcDefinitions[tcid].description)
-	tc.logHeader()
-
-	// tc := newTestCase(tcTestLogicMethod, tcid, &params)
-	tc.runTcMethod()
+	testcase.logHeader()
+	testcase.runTcMethod()
 }
 
 // ExecStep exemine if the (first) return of the func f matchs the string expect.
@@ -72,8 +70,8 @@ func (t *Test) ExecuteTestCase(tcTestLogicMethod interface{}, tcid string, param
 // params are  parameter(s), if any, of the method testStepLogicMethod
 func (t *Test) ExecStep(expect interface{}, testStepLogicMethod interface{}, params ...interface{}) {
 	var tcmParams []reflect.Value
-	sf := reflect.ValueOf(testStepLogicMethod)
-	if sf.Kind() != reflect.Func {
+	stepMethod := reflect.ValueOf(testStepLogicMethod)
+	if stepMethod.Kind() != reflect.Func {
 		panic("the step func mast be a function!")
 	}
 
@@ -85,7 +83,7 @@ func (t *Test) ExecStep(expect interface{}, testStepLogicMethod interface{}, par
 		}
 	}
 
-	ret := sf.Call(tcmParams)
+	ret := stepMethod.Call(tcmParams)
 	if len(ret) == 0 {
 		panic("It seems the step func does NOT return any value, so should not be called by ExecStep func.")
 	}
