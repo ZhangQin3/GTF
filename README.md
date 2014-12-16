@@ -16,7 +16,8 @@ GTF Provides:
 
 
 TBD:
-data driven/keyword driven support. 
-log page internal jump. 
+1. data driven/keyword driven support. 
+2. store test result to DB.
+3. log page internal jump. 
 
 Only support windows now.
