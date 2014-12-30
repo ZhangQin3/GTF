@@ -21,6 +21,7 @@ func newTestScript(fileName string, tTest interface{}) *testScript {
 	t := reflect.ValueOf(tTest)
 	s := &testScript{fileName: fileName, tTest: &t}
 	s.initLogger()
+        currentScript = s
 	return s
 }
 
