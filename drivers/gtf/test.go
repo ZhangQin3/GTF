@@ -8,49 +8,49 @@ import (
 	"reflect"
 )
 
-type testParamsFlag bool
+type paramFlag bool
 
 const (
-	Overridable    testParamsFlag = true // Overridable means the test parameters can be overrided by test suite parameters with same name.
-	NonOverridable testParamsFlag = false
+	Overridable    paramFlag = true // Overridable means the test parameters can be overrided by test suite parameters with same name.
+	NonOverridable paramFlag = false
 )
 
 type Test struct {
-	tcDefinitions map[string]*tcDefinition
-	DemoVariable  string
+	tcDefs       map[string]*tcDef
+	DemoVariable string
 }
 
-// overridable parameter is just an optional param, not variadic.
-func (t *Test) SetParam(param string, value interface{}, overridable ...testParamsFlag) {
-	if len(overridable) > 1 {
+// flag parameter is just an optional param, not variadic.
+func (t *Test) SetParam(param string, value interface{}, flag ...paramFlag) {
+	if len(flag) > 1 {
 		panic("The overrideable parameter is just an optional param, not variadic.")
 	}
 
-	if _, ok := TestParams[param]; !ok || (len(overridable) == 1 && overridable[0] == Overridable) {
+	if _, ok := TestParams[param]; !ok || (len(flag) == 1 && flag[0] == Overridable) {
 		TestParams[param] = value
 	}
 }
 
-func (t *Test) DefineCase(tcid, description string) *tcDefinition {
-	if t.tcDefinitions == nil {
-		t.tcDefinitions = make(map[string]*tcDefinition)
+func (t *Test) DefineCase(tcid, description string) *tcDef {
+	if t.tcDefs == nil {
+		t.tcDefs = make(map[string]*tcDef)
 	}
-	tcDef := &tcDefinition{tcid: tcid, description: description}
-	t.tcDefinitions[tcid] = tcDef
+	tcDef := &tcDef{tcid: tcid, description: description}
+	t.tcDefs[tcid] = tcDef
 	return tcDef
 }
 
 // Called by TestCaseProcedure in ths testcase scripts to run real tests,
-// tcTestLogicMethod is the real test method with test logic
-// tcid is the first parameter of the method tcTestLogicMethod
-// params is other parameter(s), if any, of the method tcTestLogicMethod
-func (t *Test) ExecuteTestCase(tcTestLogicMethod interface{}, tcid string, params ...interface{}) {
-	testcase := newTestCase(tcTestLogicMethod, tcid, &params)
+// testLogicMethod is the real test method with test logic
+// tcid is the first parameter of the method testLogicMethod
+// params is other parameter(s), if any, of the method testLogicMethod
+func (t *Test) ExecuteTestCase(testLogicMethod interface{}, tcid string, params ...interface{}) {
+	tc := newTestCase(testLogicMethod, tcid, &params)
 	defer func() {
-		testcase.logResult()
+		tc.logResult()
 	}()
 
-	if tcDef, ok := t.tcDefinitions[tcid]; ok {
+	if tcDef, ok := t.tcDefs[tcid]; ok {
 		if !tcDef.CalculateAppliability() {
 			return
 		}
@@ -59,18 +59,18 @@ func (t *Test) ExecuteTestCase(tcTestLogicMethod interface{}, tcid string, param
 		return
 	}
 
-	testcase.logHeader()
-	testcase.runTcMethod()
+	tc.logHeader()
+	tc.runTcMethod()
 }
 
 // ExecStep exemine if the (first) return of the func f matchs the string expect.
 // The expect string may be: "string", "regexp", "glob string", [num1, num2], [num1,num2), [num,),
 // {elem1, elem2, elem3,}, exp1||exp2||exp3
-// testStepLogicMethod is the test logic method of a step
-// params are  parameter(s), if any, of the method testStepLogicMethod
-func (t *Test) ExecStep(expect interface{}, testStepLogicMethod interface{}, params ...interface{}) {
+// stepLogicMethod is the test logic method of a step
+// params are  parameter(s), if any, of the method stepLogicMethod
+func (t *Test) ExecStep(expected interface{}, stepLogicMethod interface{}, params ...interface{}) {
 	var tcmParams []reflect.Value
-	stepMethod := reflect.ValueOf(testStepLogicMethod)
+	stepMethod := reflect.ValueOf(stepLogicMethod)
 	if stepMethod.Kind() != reflect.Func {
 		panic("the step func mast be a function!")
 	}
@@ -88,17 +88,17 @@ func (t *Test) ExecStep(expect interface{}, testStepLogicMethod interface{}, par
 		panic("It seems the step func does NOT return any value, so should not be called by ExecStep func.")
 	}
 
-	switch expect.(type) {
+	switch expected.(type) {
 	case string:
 		switch ret[0].Type().String() {
 		case "string":
-			var exp string = expect.(string)
+			var exp string = expected.(string)
 
-			log.Logf("Expected result for the step: %s", exp)
+			log.Info("Expected result for the step: ", exp)
 			if exp == ret[0].String() {
-				log.Logf("Actual result for the step: %s", ret[0].String())
+				log.Info("Actual result for the step: ", ret[0])
 			} else {
-				log.Errorf("Actual result for the step: %s", ret[0].String())
+				log.Error("Actual result for the step: ", ret[0])
 			}
 		case "int":
 			fmt.Println("--->", "int", ret[0].Type().String())
@@ -106,5 +106,5 @@ func (t *Test) ExecStep(expect interface{}, testStepLogicMethod interface{}, par
 	case int:
 		fmt.Println("--->", ret[0].Type())
 	}
-	fmt.Println(expect, ret[0].Type())
+	fmt.Println(expected, ret[0].Type())
 }

@@ -1,7 +1,9 @@
 package verify
 
-import "gtf"
-import "gtf/log"
+import (
+	"gtf/drivers/gtf"
+	"gtf/drivers/log"
+)
 
 type Test struct{ gtf.Test }
 
@@ -70,5 +72,5 @@ func (t *Test) VerifyPrototypeCleanup() {
 }
 
 func (t *Test) TestCaseProcedureCleanup() {
-	log.Log("in TestCaseProcedureCleanup")
+	log.Info("in TestCaseProcedureCleanup")
 }

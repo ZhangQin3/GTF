@@ -48,6 +48,7 @@ func cleanupTestScript(ts *tsuite.TSuite) {
 	}
 
 	ts.CaseTeardown()
+	currentScript.logTailer()
 }
 
 func runTestScripts(ts *tsuite.TSuite) {

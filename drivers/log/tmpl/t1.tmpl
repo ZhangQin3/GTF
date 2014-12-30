@@ -1,42 +1,42 @@
 {{define "WARNING"}}
-<div id="WARNING" name="WARNING"><span  class="warning">   [WARNING] {{.}}</span></div>
+<div id="WARNING" name="WARNING"><span  class="warning">[WARNING] {{.}}</span></div>
 {{end}}
 
 {{define "DEFAULT"}}
-<div id="DEFAULT" name="DEFAULT"><span class="default">   {{.}}</span></div>
+<div id="DEFAULT" name="DEFAULT"><span class="default">{{.}}</span></div>
 {{end}}
 
 {{define "DEBUG"}}
-<div id="DEBUG" name="DEBUG"><span class="debug">   [DEBUG] {{.}}</span></div>
+<div id="DEBUG" name="DEBUG"><span class="debug">[DEBUG] {{.}}</span></div>
 {{end}}
 
 {{define "INFO"}}
-<div id="INFO" name="INFO"><span class="info">   [INFO] {{.}}</span></div>
+<div id="INFO" name="INFO"><span class="info">[INFO] {{.}}</span></div>
 {{end}}
 
 {{define "ERROR"}}
-<div id="ERROR" name="ERROR"><span  class="error">   [ERROR] {{.}}</span></div>
+<div id="ERROR" name="ERROR"><span  class="error">[ERROR] {{.}}</span></div>
 {{end}}
 
 {{define "SETUP"}}
-<div id="SETUP" name="SETUP"><span  class="setup">   [SETUP] {{.}}</span></div>
+<div id="SETUP" name="SETUP"><span  class="setup">[SETUP] {{.}}</span></div>
 {{end}}
 
 {{define "D_PASS"}}
-<div id="D_PASS" name="D_PASS"><span  class="d_pass">   [PASS] {{.}}</span></div>
+<div id="D_PASS" name="D_PASS"><span  class="d_pass">[PASS] {{.}}</span></div>
 {{end}}
 
 {{define "D_FAIL"}}
-<div id="D_FAIL" name="D_FAIL"><span  class="d_fail"><br/>   [FAIL] Failed steps: {{.}}</span></div>
+<div id="D_FAIL" name="D_FAIL"><span  class="d_fail"><br/>[FAIL] Failed steps: {{.}}</span></div>
 {{end}}
 
 {{define "STEP"}}
-<div id="TEST_STEP" name="TEST_STEP"><span  class="step"> <span class="d_pass"><br>  STEP {{.Index}} [{{.Time}}]</span><span style="color:black;font-size:20">: {{.Text}} </span> </span></div>
+<div id="TEST_STEP" name="TEST_STEP"><span  class="step"> <span class="d_pass"><br>STEP {{.Index}} [{{.Time}}]</span><span style="color:black;font-size:20">: {{.Text}} </span> </span></div>
 {{end}}
 
-{{define "TS_HEADING"}}
+{{define "SCRIPT_HEADING"}}
 <center>
-<font size='5'> Golang Test Framework Report ( {{.Text}}.go ) </font></br>
+<font size='5'> GTF Execution Report ( {{.Text}}.go ) </font></br>
 Test Start: {{.Time}} </br>
 </center>
 </br>
@@ -53,6 +53,15 @@ Test Start: {{.Time}} </br>
 <div style="display:none">hide</div>
 </table>
 </center>
+<dl>
+<dd>
+{{end}}
+
+{{define "SCRIPT_TAIL"}}
+</dd>
+</dl>
+</body>
+</html>
 {{end}}
 
 {{define "TC_HEADING"}}
@@ -89,8 +98,22 @@ Test Start: {{.Time}} </br>
 <div style="display:none">hide</div>
 {{end}}
 
-{{define "TOGGLE_INFO"}}
-<div class="toggle_title"> <a href="javascript:toggleDisplay('{{.TextId}}');">{{.Title}}</a></div><br><div class="debugport_body_On" id="{{.TextId}}" style="display: {{.Switch}}"><pre>
-    {{.Text}}
-</pre></div>
+{{define "TOGGLE_TEXT"}}
+<div class="toggle_text">
+<a href="javascript:toggleDisplay('{{.TextId}}');">{{.Title}}</a><br></br>
+</div>
+<div class="debugport_body_On" id="{{.TextId}}" style="display: {{.Switch}}">
+{{.Text}}
+<br></br>
+</div>
+{{end}}
+
+{{define "TOGGLE_IMAGE"}}
+<div class="toggle_image">
+<a href="javascript:toggleDisplay('{{.ImgId}}');">{{.Title}}</a>
+</div>
+</br>
+<div class="debugport_body_On" id="{{.ImgId}}" style="display: {{.Switch}};">
+<img altxt="+altxt+" src='{{.ImgSrc}}'></img></br>
+</div>
 {{end}}

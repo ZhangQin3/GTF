@@ -1,7 +1,9 @@
 package verify
 
-import "gtf"
-import "gtf/log"
+import (
+	"gtf/drivers/gtf"
+	"gtf/drivers/log"
+)
 
 type Test struct{ gtf.Test }
 
@@ -29,6 +31,9 @@ func (t *Test) TestCaseProcedure() {
 
 // --------------- Test Procedure ---------------
 func (t *Test) VerifyPrototype(tcid string) {
+	log.Info("Error occurs before first step.")
+	log.Error("ddddddddddddddddddd")
+
 	log.Step(1, "setup ----null---- router")
 	t.ExecStep("OK", t.stepTest, "123")
 
@@ -70,5 +75,5 @@ func (t *Test) VerifyPrototypeCleanup() {
 }
 
 func (t *Test) TestCaseProcedureCleanup() {
-	log.Log("in TestCaseProcedureCleanup")
+	log.Info("in TestCaseProcedureCleanup")
 }

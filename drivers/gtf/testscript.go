@@ -15,11 +15,11 @@ type testScript struct {
 	logger   *log.Logger    /* logger for each test script.  */
 }
 
-func newTestScript(scriptFileName string, tTest interface{}) *testScript {
-	test := reflect.ValueOf(tTest)
-	testscript := &testScript{fileName: scriptFileName, tTest: &test}
-	testscript.initLogger()
-	return testscript
+func newTestScript(fileName string, tTest interface{}) *testScript {
+	t := reflect.ValueOf(tTest)
+	s := &testScript{fileName: fileName, tTest: &t}
+	s.initLogger()
+	return s
 }
 
 func (s *testScript) initLogger() {
@@ -31,12 +31,15 @@ func (s *testScript) initLogger() {
 
 /* Log a test script information in the report file. */
 func (s *testScript) logHeader() {
-	s.logger.Output("TS_HEADING",
+	s.logger.Output("SCRIPT_HEADING",
 		log.LOnlyFile,
-		log.TestScriptHdrInfo{
+		log.TestScriptHdr{
 			time.Now().String(),
 			s.fileName,
 		})
+}
+func (s *testScript) logTailer() {
+	s.logger.Output("SCRIPT_TAIL", log.LOnlyFile, nil)
 }
 
 /* fieldName is the field name of Test in test.go, tTest promotes them. */
@@ -44,6 +47,6 @@ func (s *testScript) tTestField(fieldName string) reflect.Value {
 	return s.tTest.Elem().FieldByName(fieldName)
 }
 
-func (s *testScript) tcDefinitionField(tcid, fieldName string) string {
-	return s.tTest.Elem().FieldByName("tcDefinitions").MapIndex(reflect.ValueOf(tcid)).Elem().FieldByName(fieldName).String()
+func (s *testScript) tcDefField(tcid, fieldName string) string {
+	return s.tTest.Elem().FieldByName("tcDefs").MapIndex(reflect.ValueOf(tcid)).Elem().FieldByName(fieldName).String()
 }
