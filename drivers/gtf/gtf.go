@@ -16,12 +16,12 @@ var (
 )
 
 func GtfMain() {
-	var ts = initTestSuite()
+	var ts = suiteSetup()
 	runTestScripts(ts)
 	ts.SuiteTeardown()
 }
 
-func initTestSuite() *tsuite.TSuite {
+func suiteSetup() *tsuite.TSuite {
 	var ts = new(tsuite.TSuite)
 	ts.SetSuiteParams()
 	ts.SuitSetup()
