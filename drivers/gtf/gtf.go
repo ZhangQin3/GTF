@@ -16,13 +16,13 @@ var (
 )
 
 func GtfMain() {
-	var ts = suiteSetup()
+	ts := suiteSetup()
 	runTestScripts(ts)
 	ts.SuiteTeardown()
 }
 
 func suiteSetup() *tsuite.TSuite {
-	var ts = new(tsuite.TSuite)
+	ts := new(tsuite.TSuite)
 	ts.SetSuiteParams()
 	ts.SuitSetup()
 	return ts
