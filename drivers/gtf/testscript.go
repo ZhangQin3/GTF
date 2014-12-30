@@ -1,4 +1,4 @@
-package gtf
+ package gtf
 
 import (
 	"fmt"
@@ -53,7 +53,7 @@ func (s *testScript) tcDefField(tcid, fieldName string) string {
 	return s.tTest.Elem().FieldByName("tcDefs").MapIndex(reflect.ValueOf(tcid)).Elem().FieldByName(fieldName).String()
 }
 
-func (s *testScript) testScriptSetup(ts *tsuite.TSuite) {
+func (s *testScript) setup(ts *tsuite.TSuite) {
 	s.logHeader()
 
 	/* Initialize TestParams from testsuite SuiteParams. */
@@ -61,11 +61,11 @@ func (s *testScript) testScriptSetup(ts *tsuite.TSuite) {
 	ts.CaseSetup()
 }
 
-func (s *testScript) testScriptCleanup(ts *tsuite.TSuite) {
+func (s *testScript) cleanup(ts *tsuite.TSuite) {
 	/* Call test script level Cleanup method. */
-	tcpCleanup := s.tTest.MethodByName("TestCaseProcedureCleanup")
-	if tcpCleanup.Kind() == reflect.Func {
-		tcpCleanup.Call(nil)
+	c := s.tTest.MethodByName("TestCaseProcedureCleanup")
+	if c.Kind() == reflect.Func {
+		c.Call(nil)
 	}
 
 	ts.CaseTeardown()
@@ -73,10 +73,10 @@ func (s *testScript) testScriptCleanup(ts *tsuite.TSuite) {
 }
 
 func (s *testScript) runTestCases() (err error) {
-	currentScript.tTest.MethodByName("SetTestParams").Call(nil)
-	if tcDef := currentScript.tTest.MethodByName("CaseDefinitions"); tcDef.IsValid() {
+	s.tTest.MethodByName("SetTestParams").Call(nil)
+	if def := s.tTest.MethodByName("CaseDefinitions"); def.IsValid() {
 		/* The global variable tcDefs will be filled here. */
-		tcDef.Call(nil)
+		def.Call(nil)
 	} else {
 		/* None testcase is defined. Log a message in the log file, and stop execute the testscript. */
 		log.Error("[ERROR] No testcase defined in the script.")
@@ -86,8 +86,8 @@ func (s *testScript) runTestCases() (err error) {
 	/* Execute TestCaseProcedure, in the method TestCaseProcedure the function ExecuteTestCase
 	   will be called to execute each test procedure for each testcase via executing Test.ExecuteTestCase method. */
 	for i := 0; i < TestSuiteSchema.Repetitions[s.fileName]; i++ {
-		tp := currentScript.tTest.MethodByName("TestCaseProcedure")
-		tp.Call(nil)
+		m := s.tTest.MethodByName("TestCaseProcedure")
+		m.Call(nil)
 	}
 	return nil
 }
