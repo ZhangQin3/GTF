@@ -49,10 +49,9 @@ func suiteSetup() *tsuite.TSuite {
 // }
 
 func runTestScripts(ts *tsuite.TSuite) {
-	/*  scriptFileName, tTest := "test_verify_test", new(test_verify_test.Test) */
-	for scriptFileName, tTest := range TestSuiteSchema.TestScripts {
-		// initTestScript(scriptFileName, tTest, ts)
-		currentScript = newTestScript(scriptFileName, tTest)
+	/*  fileName, tTest := "test_verify_test", new(test_verify_test.Test) */
+	for fileName, tTest := range TestSuiteSchema.TestScripts {
+		currentScript = newTestScript(fileName, tTest)
 		currentScript.testScriptSetup(ts)
 		if err := currentScript.runTestCases(); err != nil {
 			continue /*Jump out to execute the next script. */
