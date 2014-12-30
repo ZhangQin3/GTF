@@ -1,8 +1,10 @@
 package gtf
 
 import (
+	"fmt"
 	"gtf/drivers/common"
 	"gtf/drivers/log"
+	tsuite "gtf/testsuites/tsuite"
 	"reflect"
 	"strconv"
 	"time"
@@ -49,4 +51,43 @@ func (s *testScript) tTestField(fieldName string) reflect.Value {
 
 func (s *testScript) tcDefField(tcid, fieldName string) string {
 	return s.tTest.Elem().FieldByName("tcDefs").MapIndex(reflect.ValueOf(tcid)).Elem().FieldByName(fieldName).String()
+}
+
+func (s *testScript) testScriptSetup(ts *tsuite.TSuite) {
+	s.logHeader()
+
+	/* Initialize TestParams from testsuite SuiteParams. */
+	TestParams = ts.SuiteParams
+	ts.CaseSetup()
+}
+
+func (s *testScript) testScriptCleanup(ts *tsuite.TSuite) {
+	/* Call test script level Cleanup method. */
+	tcpCleanup := s.tTest.MethodByName("TestCaseProcedureCleanup")
+	if tcpCleanup.Kind() == reflect.Func {
+		tcpCleanup.Call(nil)
+	}
+
+	ts.CaseTeardown()
+	s.logTailer()
+}
+
+func (s *testScript) runTestCases() (err error) {
+	currentScript.tTest.MethodByName("SetTestParams").Call(nil)
+	if tcDef := currentScript.tTest.MethodByName("CaseDefinitions"); tcDef.IsValid() {
+		/* The global variable tcDefs will be filled here. */
+		tcDef.Call(nil)
+	} else {
+		/* None testcase is defined. Log a message in the log file, and stop execute the testscript. */
+		log.Error("[ERROR] No testcase defined in the script.")
+		return fmt.Errorf("Jump out to execute the next script.")
+	}
+
+	/* Execute TestCaseProcedure, in the method TestCaseProcedure the function ExecuteTestCase
+	   will be called to execute each test procedure for each testcase via executing Test.ExecuteTestCase method. */
+	for i := 0; i < TestSuiteSchema.Repetitions[s.fileName]; i++ {
+		tp := currentScript.tTest.MethodByName("TestCaseProcedure")
+		tp.Call(nil)
+	}
+	return nil
 }
