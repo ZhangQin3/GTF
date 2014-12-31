@@ -27,7 +27,7 @@ type testcase struct {
 // tcid: the first parameter of the method tcTestLogicMethod
 // params: other parameter(s)of the method tcTestLogicMethod, if any
 func newTestCase(tcTestLogicMethod interface{}, tcid string, params *[]interface{}) *testcase {
-	var tcMParams []reflect.Value
+	var vParams []reflect.Value
 	var tc testcase
 	tc.testScript = currentScript
 	tp := reflect.ValueOf(tcTestLogicMethod)
@@ -41,15 +41,15 @@ func newTestCase(tcTestLogicMethod interface{}, tcid string, params *[]interface
 	tc.tcid = tcid
 	tc.description = tc.testScript.tcDefField(tcid, "description")
 
-	paramsLen := len(*params)
-	tcMParams = make([]reflect.Value, paramsLen+1)
-	tcMParams[0] = reflect.ValueOf(tcid)
-	if paramsLen != 0 {
-		for i := 0; i < paramsLen; i++ {
-			tcMParams[i+1] = reflect.ValueOf((*params)[i])
+	len := len(*params)
+	vParams = make([]reflect.Value, len+1)
+	vParams[0] = reflect.ValueOf(tcid)
+	if len != 0 {
+		for i := 0; i < len; i++ {
+			vParams[i+1] = reflect.ValueOf((*params)[i])
 		}
 	}
-	tc.methodParams = &tcMParams
+	tc.methodParams = &vParams
 	return &tc
 }
 
@@ -162,7 +162,7 @@ func (tc *testcase) logResult() {
 }
 
 func (tc *testcase) logHeader() {
-	tc.testScript.logger.Output("TC_HEADING",
+	tc.testScript.logger.Output("TC_HEADER",
 		log.LOnlyFile,
 		log.TestcaseHdr{
 			tc.tcid,

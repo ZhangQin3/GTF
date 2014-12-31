@@ -14,52 +14,52 @@ type tcDef struct {
 	feature     string // The feature(s) the testcase belongs to.
 }
 
-func (def *tcDef) R(requirement string) *tcDef {
-	def.requirement = requirement
-	return def
+func (d *tcDef) R(requirement string) *tcDef {
+	d.requirement = requirement
+	return d
 }
 
-func (def *tcDef) A(applicable string) *tcDef {
-	def.applicable = applicable
-	return def
+func (d *tcDef) A(applicable string) *tcDef {
+	d.applicable = applicable
+	return d
 }
 
-func (def *tcDef) RA(requirement, applicable string) *tcDef {
-	def.requirement = requirement
-	def.applicable = applicable
-	return def
+func (d *tcDef) RA(requirement, applicable string) *tcDef {
+	d.requirement = requirement
+	d.applicable = applicable
+	return d
 }
 
 // TODO priority
-func (def *tcDef) P(priority string) *tcDef {
-	def.priority = priority
-	return def
+func (d *tcDef) P(priority string) *tcDef {
+	d.priority = priority
+	return d
 }
 
 // TODO feature list
-func (def *tcDef) F(feature string) *tcDef {
-	def.feature = feature
-	return def
+func (d *tcDef) F(feature string) *tcDef {
+	d.feature = feature
+	return d
 }
 
-func (def *tcDef) calculateApplicable() bool {
+func (d *tcDef) calculateApplicable() bool {
 	//TODO: the calculation of the applicalibity according to def.tcApplicable
 	//The method should be independent from the feature tested.
 	return true
 }
 
-func (def *tcDef) calculateReqirement() bool {
+func (d *tcDef) calculateReqirement() bool {
 	//TODO: the calculation of the applicalibity according to def.tcRequirement
 	//The method should be independent from the feature tested.
 	return true
 }
 
-func (def *tcDef) CalculateAppliability() bool {
-	if !def.calculateApplicable() {
+func (d *tcDef) CalculateAppliability() bool {
+	if !d.calculateApplicable() {
 		fmt.Println("[ERROR] The testcase is not applicable.")
 		return false
 	}
-	if !def.calculateReqirement() {
+	if !d.calculateReqirement() {
 		fmt.Println("[ERROR] The testcase's requirements are not be satisfied.")
 		return false
 	}

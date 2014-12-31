@@ -34,7 +34,7 @@
 <div id="TEST_STEP" name="TEST_STEP"><span  class="step"> <span class="d_pass"><br>STEP {{.Index}} [{{.Time}}]</span><span style="color:black;font-size:20">: {{.Text}} </span> </span></div>
 {{end}}
 
-{{define "SCRIPT_HEADING"}}
+{{define "LOG_HEADER"}}
 <center>
 <font size='5'> GTF Execution Report ( {{.Text}}.go ) </font></br>
 Test Start: {{.Time}} </br>
@@ -57,14 +57,14 @@ Test Start: {{.Time}} </br>
 <dd>
 {{end}}
 
-{{define "SCRIPT_TAIL"}}
+{{define "LOG_TAILER"}}
 </dd>
 </dl>
 </body>
 </html>
 {{end}}
 
-{{define "TC_HEADING"}}
+{{define "TC_HEADER"}}
 <div id= 'testcase_heading' name='testcase_heading' >
 </br><table summary='' class='log_heading_table'>
 <tr class='log_heading_table_th'><td> TCID: {{.TcID}} for B05.A.1 -- {{.Text}} </td></tr>

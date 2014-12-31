@@ -1,7 +1,6 @@
- package gtf
+package gtf
 
 import (
-	"fmt"
 	"gtf/drivers/common"
 	"gtf/drivers/log"
 	tsuite "gtf/testsuites/tsuite"
@@ -10,18 +9,22 @@ import (
 	"time"
 )
 
+var currentScript *testScript
+
 /* Contains the data for each test script */
 type testScript struct {
 	fileName string         /* test script file name without suffix(.go). */
 	tTest    *reflect.Value /* the the pointer to the instance of the Test struct in the test script */
-	logger   *log.Logger    /* logger for each test script.  */
+	tSuite   *tsuite.TSuite
+	logger   *log.Logger /* logger for each test script.  */
 }
 
-func newTestScript(fileName string, tTest interface{}) *testScript {
+func newTestScript(fileName string, tTest interface{}, ts *tsuite.TSuite) *testScript {
 	t := reflect.ValueOf(tTest)
 	s := &testScript{fileName: fileName, tTest: &t}
 	s.initLogger()
-        currentScript = s
+	s.tSuite = ts
+	currentScript = s
 	return s
 }
 
@@ -34,7 +37,7 @@ func (s *testScript) initLogger() {
 
 /* Log a test script information in the report file. */
 func (s *testScript) logHeader() {
-	s.logger.Output("SCRIPT_HEADING",
+	s.logger.Output("LOG_HEADER",
 		log.LOnlyFile,
 		log.TestScriptHdr{
 			time.Now().String(),
@@ -42,7 +45,7 @@ func (s *testScript) logHeader() {
 		})
 }
 func (s *testScript) logTailer() {
-	s.logger.Output("SCRIPT_TAIL", log.LOnlyFile, nil)
+	s.logger.Output("LOG_TAILER", log.LOnlyFile, nil)
 }
 
 /* fieldName is the field name of Test in test.go, tTest promotes them. */
@@ -54,41 +57,40 @@ func (s *testScript) tcDefField(tcid, fieldName string) string {
 	return s.tTest.Elem().FieldByName("tcDefs").MapIndex(reflect.ValueOf(tcid)).Elem().FieldByName(fieldName).String()
 }
 
-func (s *testScript) setup(ts *tsuite.TSuite) {
+func (s *testScript) setup() {
 	s.logHeader()
 
 	/* Initialize TestParams from testsuite SuiteParams. */
-	TestParams = ts.SuiteParams
-	ts.CaseSetup()
+	TestParams = s.tSuite.SuiteParams
+	s.tSuite.CaseSetup()
 }
 
-func (s *testScript) cleanup(ts *tsuite.TSuite) {
+func (s *testScript) cleanup() {
 	/* Call test script level Cleanup method. */
 	c := s.tTest.MethodByName("TestCaseProcedureCleanup")
 	if c.Kind() == reflect.Func {
 		c.Call(nil)
 	}
 
-	ts.CaseTeardown()
+	s.tSuite.CaseTeardown()
 	s.logTailer()
 }
 
-func (s *testScript) runTestCases() (err error) {
+func (s *testScript) runTestCases() {
 	s.tTest.MethodByName("SetTestParams").Call(nil)
-	if def := s.tTest.MethodByName("CaseDefinitions"); def.IsValid() {
+	if d := s.tTest.MethodByName("CaseDefinitions"); d.IsValid() {
 		/* The global variable tcDefs will be filled here. */
-		def.Call(nil)
+		d.Call(nil)
 	} else {
 		/* None testcase is defined. Log a message in the log file, and stop execute the testscript. */
 		log.Error("[ERROR] No testcase defined in the script.")
-		return fmt.Errorf("Jump out to execute the next script.")
+		return
 	}
 
 	/* Execute TestCaseProcedure, in the method TestCaseProcedure the function ExecuteTestCase
 	   will be called to execute each test procedure for each testcase via executing Test.ExecuteTestCase method. */
 	for i := 0; i < TestSuiteSchema.Repetitions[s.fileName]; i++ {
-		m := s.tTest.MethodByName("TestCaseProcedure")
-		m.Call(nil)
+		p := s.tTest.MethodByName("TestCaseProcedure")
+		p.Call(nil)
 	}
-	return nil
 }

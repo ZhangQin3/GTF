@@ -35,9 +35,9 @@ func (t *Test) DefineCase(tcid, description string) *tcDef {
 	if t.tcDefs == nil {
 		t.tcDefs = make(map[string]*tcDef)
 	}
-	tcDef := &tcDef{tcid: tcid, description: description}
-	t.tcDefs[tcid] = tcDef
-	return tcDef
+	d := &tcDef{tcid: tcid, description: description}
+	t.tcDefs[tcid] = d
+	return d
 }
 
 // Called by TestCaseProcedure in ths testcase scripts to run real tests,
@@ -69,21 +69,21 @@ func (t *Test) ExecuteTestCase(testLogicMethod interface{}, tcid string, params 
 // stepLogicMethod is the test logic method of a step
 // params are  parameter(s), if any, of the method stepLogicMethod
 func (t *Test) ExecStep(expected interface{}, stepLogicMethod interface{}, params ...interface{}) {
-	var tcmParams []reflect.Value
+	var vParams []reflect.Value
 	stepMethod := reflect.ValueOf(stepLogicMethod)
 	if stepMethod.Kind() != reflect.Func {
 		panic("the step func mast be a function!")
 	}
 
-	paramsLen := len(params)
-	if paramsLen != 0 {
-		tcmParams = make([]reflect.Value, paramsLen)
-		for i := 0; i < paramsLen; i++ {
-			tcmParams[i] = reflect.ValueOf((params)[i])
+	l := len(params)
+	if l != 0 {
+		vParams = make([]reflect.Value, l)
+		for i := 0; i < l; i++ {
+			vParams[i] = reflect.ValueOf((params)[i])
 		}
 	}
 
-	ret := stepMethod.Call(tcmParams)
+	ret := stepMethod.Call(vParams)
 	if len(ret) == 0 {
 		panic("It seems the step func does NOT return any value, so should not be called by ExecStep func.")
 	}

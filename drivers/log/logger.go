@@ -55,12 +55,12 @@ func NewLogger(fileName, tmplFielName string) *Logger {
 		panic(err)
 	}
 
-	logFile, err := os.OpenFile(fileName, os.O_RDWR|os.O_APPEND, 0666)
+	file, err := os.OpenFile(fileName, os.O_RDWR|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)
 	}
 
-	log = &Logger{stdOut: os.Stdout, file: logFile, template: t, fileName: fileName}
+	log = &Logger{stdOut: os.Stdout, file: file, template: t, fileName: fileName}
 	return log
 }
 
