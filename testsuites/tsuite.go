@@ -26,7 +26,7 @@ func (ts *TSuite) SuitSetup() {
 }
 
 /* run on the end on the test suite. */
-func (ts *TSuite) SuiteTeardown() {
+func (ts *TSuite) SuiteCleanup() {
 
 }
 
@@ -36,6 +36,6 @@ func (ts *TSuite) CaseSetup() {
 }
 
 /* run on the end of every testcase. */
-func (ts *TSuite) CaseTeardown() {
+func (ts *TSuite) CaseCleanup() {
 
 }
