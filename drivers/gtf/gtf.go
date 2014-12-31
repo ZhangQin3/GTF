@@ -15,7 +15,7 @@ var (
 func GtfMain() {
 	ts := suiteSetup()
 	runTestScripts(ts)
-	ts.SuiteTeardown()
+	ts.SuiteCleanup()
 }
 
 func suiteSetup() *tsuite.TSuite {
