@@ -8,8 +8,8 @@ type TSuite struct{ suite.Suite }
 
 /* Setting suite level parameters */
 func (ts *TSuite) SetSuiteParams() {
-	ts.SetParam("NewSWVersion", "1.1.1.1")
-	ts.SetParam("OldSWVersion", "1.1.1.2")
+	ts.SetParam("NewSWVersion", "1.1.1.2")
+	ts.SetParam("OldSWVersion", "1.1.1.1")
 }
 
 func (ts *TSuite) SuiteScheme() {
