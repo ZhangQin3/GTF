@@ -70,7 +70,7 @@ func (tc *testcase) runTcMethod() {
 				tc.logHorizonLine()
 				l.GenerateStep("PostTest", "PostTest")
 			}
-			tc.callCleanupOnCrashMethod()
+			tc.callOnCrashMethod()
 		}
 	}()
 	/* Add PreTest in case error occurs before first step. */
