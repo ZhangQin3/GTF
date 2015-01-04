@@ -32,7 +32,13 @@ func (t *Test) VerifyPrototype(tcid string) {
 	log.Step(2, "Input user name.")
 	p.UserName().SetText("technician")
 
+	b, e := p.UserName().DoesExist()
+	log.Warning("----------- ", b, e)
+
 	log.Step(3, "Input user password.")
+	c, f := p.Passord().DoesExist()
+	log.Warning("----------- ", c, f)
+
 	p.Passord().SetText("T!m3W4rn3rC4bl3")
 
 	log.Step(4, "Apply inputs.")

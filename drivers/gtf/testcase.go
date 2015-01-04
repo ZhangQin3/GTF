@@ -62,6 +62,7 @@ func (tc *testcase) runTcMethod() {
 			log.Error(err)
 			var buf []byte = make([]byte, 1500)
 			runtime.Stack(buf, true)
+			log.Warning("-------------------------===========================")
 			tc.logStackTrace(buf)
 
 			/* Call testcase cleanup on crash methed if testcase method of cleanup method panics. */
@@ -87,7 +88,7 @@ func (tc *testcase) runTcMethod() {
 	tc.callCleanupMethod()
 }
 
-func (tc *testcase) callCleanupOnCrashMethod() {
+func (tc *testcase) callOnCrashMethod() {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error(err)

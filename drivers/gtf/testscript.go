@@ -72,7 +72,7 @@ func (s *testScript) cleanup() {
 		c.Call(nil)
 	}
 
-	s.tSuite.CaseTeardown()
+	s.tSuite.CaseCleanup()
 	s.logTailer()
 }
 
