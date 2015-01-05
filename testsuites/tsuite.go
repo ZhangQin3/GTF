@@ -16,7 +16,8 @@ func (ts *TSuite) SuiteScheme() {
 	ts.Scheme = `
        // {"script": "test_verify_test.go","repetitions":1}
        // {"script": "test_verify_second.go","repetitions":2}
-       {"script": "test_verify_web.go"}
+       // {"script": "test_verify_web.go"}
+       {"script": "test_verify_arrs_web.go"}
 	`
 }
 
