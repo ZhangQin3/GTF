@@ -3,7 +3,7 @@ package arrs
 import (
 	"gtf/drivers/gtf"
 	"gtf/drivers/log"
-	"gtf/libraries/arrs"
+	"gtf/library/arrs"
 )
 
 type Test struct{ gtf.Test }
@@ -34,6 +34,8 @@ func (t *Test) VerifyPrototype(tcid string) {
 
 	b, e := p.UserName().DoesExist()
 	log.Warning("----------- ", b, e)
+	x, y := p.ScreenShot()
+	log.Warning("------+++++----- ", x, y)
 
 	log.Step(3, "Input user password.")
 	c, f := p.Passord().DoesExist()

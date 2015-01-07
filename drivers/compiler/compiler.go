@@ -23,7 +23,7 @@ type scriptScheme struct {
 func main() {
 	compileGtfPkg()
 	// common.CompileStdGoPkg("gse")
-	common.CompileStdGoPkg("gtf/libraries/arrs")
+	common.CompileStdGoPkg("gtf/library/arrs")
 	CompileTestScripts()
 	CompileExecuteGoFile("execute.go")
 

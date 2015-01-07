@@ -1,11 +1,11 @@
 package arrs
 
-import "gse"
+import "se"
 
-type WanSetup struct{ gse.Page }
+type WanSetup struct{ se.Page }
 
 func OpenWanSetup(parent LoginPage) WanSetup {
-	parent.Link(gse.ByLinkText, "WAN Setup").Click()
+	parent.Link(se.ByLinkText, "WAN Setup").Click()
 
 	return WanSetup(parent)
 }
