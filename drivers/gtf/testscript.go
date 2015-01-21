@@ -30,7 +30,7 @@ func newTestScript(fileName string, tTest interface{}, ts *tsuite.TSuite) *testS
 
 func (s *testScript) initLogger() {
 	logFile := s.fileName + "." + strconv.FormatInt(time.Now().Unix(), 10) + ".html"
-	common.CopyFile(`..\src\gtf\drivers\log\tmpl\header.html`, logFile)
+	common.CopyFile(logFile, `..\src\gtf\drivers\log\tmpl\header.html`)
 
 	s.logger = log.NewLogger(logFile, `..\src\gtf\drivers\log\tmpl\t1.tmpl`)
 }
