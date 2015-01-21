@@ -28,18 +28,12 @@ type testcase struct {
 // params: other parameter(s)of the method tcTestLogicMethod, if any
 func newTestCase(tcTestLogicMethod interface{}, tcid string, params *[]interface{}) *testcase {
 	var vParams []reflect.Value
-	var tc testcase
-	tc.testScript = currentScript
-	tp := reflect.ValueOf(tcTestLogicMethod)
-	_, funcName := getFunctionName(tp)
+	method := reflect.ValueOf(tcTestLogicMethod)
+	_, funcName := getFunctionName(method)
 
-	if tp.Kind() != reflect.Func {
+	if method.Kind() != reflect.Func {
 		panic("The first param of the gtf.Execute must be a testcase method!")
 	}
-	tc.method = tp
-	tc.methodName = funcName
-	tc.tcid = tcid
-	tc.description = tc.testScript.tcDefField(tcid, "description")
 
 	len := len(*params)
 	vParams = make([]reflect.Value, len+1)
@@ -49,8 +43,9 @@ func newTestCase(tcTestLogicMethod interface{}, tcid string, params *[]interface
 			vParams[i+1] = reflect.ValueOf((*params)[i])
 		}
 	}
-	tc.methodParams = &vParams
-	return &tc
+
+	descr := currentScript.tcDefField(tcid, "description")
+	return &testcase{testScript: currentScript, method: method, methodName: funcName, methodParams: &vParams, tcid: tcid, description: descr}
 }
 
 func (tc *testcase) runTcMethod() {
