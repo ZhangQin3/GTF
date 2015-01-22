@@ -54,7 +54,7 @@ func CompileTestScripts() {
 		goFileName := obj.Script
 		fmt.Println(goFileName)
 		// Test file doex NOT exist.
-		if !common.IsFileExist(common.ScriptsSrcDir, goFileName) {
+		if !common.DoesFileExist(common.ScriptsSrcDir, goFileName) {
 			fmt.Println("[WARNNING]: Test file " + goFileName + " does NOT exist!")
 			continue
 		}
@@ -87,9 +87,9 @@ func CompileExecuteGoFile(fileName string) {
 	var execFileName = filePrefix + ".exe"
 	var pkgFileName = ` temp/` + filePrefix + ".a"
 
-	if common.IsFileExist(common.GoBinDir, execFileName) {
-		pkgModTime := common.GetFileDate(common.GoBinDir, execFileName)
-		goModTime := common.GetFileDate(`../execute/`, fileName)
+	if common.DoesFileExist(common.GoBinDir, execFileName) {
+		pkgModTime := common.GetFileModTime(common.GoBinDir, execFileName)
+		goModTime := common.GetFileModTime(`../execute/`, fileName)
 		if pkgModTime.After(goModTime) {
 			doComepile = false
 		}

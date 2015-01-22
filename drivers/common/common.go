@@ -14,15 +14,15 @@ import (
 
 var (
 	GoPkgDir         = PkgDir()
-	GoPath           = os.Getenv("gopath")
-	ScriptsPkgDir    = PkgDir() + "gtf/scripts/"
-	ScriptsSrcDir    = GoPath + "src/gtf/scripts/"
-	TsPkgDir         = PkgDir() + "gtf/testsuites/"
-	TsSrcDir         = GoPath + "src/gtf/testsuites/"
-	GtfPkgDir        = PkgDir() + "gtf/"
-	GoBinDir         = GoPath + "bin/"
-	GtfDriversPkgDir = PkgDir() + "gtf/drivers/"
-	ProcessorLevel   = os.Getenv("PROCESSOR_LEVEL")
+	GoPath           = os.Getenv(`gopath`)
+	ScriptsPkgDir    = PkgDir() + `gtf\scripts\`
+	ScriptsSrcDir    = GoPath + `src\gtf\scripts\`
+	TsPkgDir         = PkgDir() + `gtf\testsuites\`
+	TsSrcDir         = GoPath + `src\gtf\testsuites\`
+	GtfPkgDir        = PkgDir() + `gtf\`
+	GoBinDir         = GoPath + `bin\`
+	GtfDriversPkgDir = PkgDir() + `gtf\drivers\`
+	ProcessorLevel   = os.Getenv(`PROCESSOR_LEVEL`)
 	DriversDir       = driversDir()
 )
 
@@ -49,13 +49,15 @@ func CompileSingleFilePkg(fileName, fileDir, pkgLocation string) {
 	var filePrefix = strings.TrimSuffix(fileName, ".go")
 	var pkgFileName = filePrefix + ".a"
 
-	if IsFileExist(GoPkgDir, pkgFileName) {
-		pkgModTime := GetFileDate(GoPkgDir, pkgFileName)
-		goModTime := GetFileDate(fileDir, fileName)
-		if goModTime.After(pkgModTime) {
-			ExecOSCmd("go tool %sg -o %s%s -I %s -pack %s%s", ProcessorLevel, pkgLocation, pkgFileName, GoPkgDir, fileDir, fileName)
+	if DoesFileExist(GoPkgDir, pkgFileName) {
+		pkgModTime := GetFileModTime(GoPkgDir, pkgFileName)
+		goModTime := GetFileModTime(fileDir, fileName)
+		if pkgModTime.After(goModTime) {
+			return
 		}
 	}
+
+	ExecOSCmd("go tool %sg -o %s%s -I %s -pack %s%s", ProcessorLevel, pkgLocation, pkgFileName, GoPkgDir, fileDir, fileName)
 }
 
 func CompileGtfCompiler() {
@@ -79,11 +81,10 @@ func BinDir() string {
 func driversDir() string {
 	_, commonFile, _, _ := runtime.Caller(0)
 	dir, _ := path.Split(path.Dir(commonFile))
-
 	return dir
 }
 
-func GetFileDate(fileDir string, fileName string) time.Time {
+func GetFileModTime(fileDir string, fileName string) time.Time {
 	fileInfo, err := os.Stat(fileDir + fileName)
 	if err != nil {
 		panic(err)
@@ -91,7 +92,7 @@ func GetFileDate(fileDir string, fileName string) time.Time {
 	return fileInfo.ModTime()
 }
 
-func IsFileExist(dir, fileName string) bool {
+func DoesFileExist(dir, fileName string) bool {
 	if _, err := os.Stat(dir + fileName); err == nil {
 		return true
 	} else {
