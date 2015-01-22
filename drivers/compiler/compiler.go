@@ -12,8 +12,6 @@ import (
 	"strings"
 )
 
-// All the dir operations below are relative to %GOPATH%/src/gtf/drivers/compile/ directory
-
 type scriptScheme struct {
 	Script      string `json:",omitempty"`
 	Repetitions int    `json:",omitempty"`
@@ -22,7 +20,6 @@ type scriptScheme struct {
 
 func main() {
 	compileGtfPkg()
-	// common.CompileStdGoPkg("gse")
 	common.CompileStdGoPkg("gtf/library/arrs")
 	CompileTestScripts()
 	CompileExecuteGoFile("execute.go")
@@ -33,8 +30,6 @@ func main() {
 
 func compileGtfPkg() {
 	common.CompileStdGoPkg("gtf/drivers/log")
-	// common.CompileStdGoPkg("gtf/drivers/gtf")
-	// common.CompileMultiFilesPkg("log", common.GtfPkgDir)
 	common.CompileMultiFilesPkg("gtf", common.GtfDriversPkgDir)
 }
 
@@ -45,34 +40,36 @@ var (
 )
 
 func CompileTestScripts() {
-	testSuiteScheme := decodeTestSuiteScheme()
-	if len(testSuiteScheme) == 0 {
+	scheme := decodeTestSuiteScheme()
+	if len(scheme) == 0 {
 		panic("There is not any test script in the testSuiteScheme.")
 	}
 
-	for _, obj := range testSuiteScheme {
-		goFileName := obj.Script
-		fmt.Println(goFileName)
+	for _, obj := range scheme {
+		fileName := obj.Script
+		fmt.Println(fileName)
+
 		// Test file doex NOT exist.
-		if !common.DoesFileExist(common.ScriptsSrcDir, goFileName) {
-			fmt.Println("[WARNNING]: Test file " + goFileName + " does NOT exist!")
+		if !common.DoesFileExist(common.ScriptsSrcDir, fileName) {
+			fmt.Println("[WARNNING]: Test file " + fileName + " does NOT exist!")
 			continue
 		}
-		common.CompileSingleFilePkg(goFileName, common.ScriptsSrcDir, common.ScriptsPkgDir)
-		appendExecuteInfo(goFileName, obj.Repetitions)
+		common.CompileSingleFilePkg(fileName, common.ScriptsSrcDir, common.ScriptsPkgDir)
+		appendExecuteInfo(fileName, obj)
 	}
 	GenerateExecuteGoFile()
 }
 
-func appendExecuteInfo(goFileName string, rep int) {
-	goBaseName := strings.TrimSuffix(goFileName, ".go")
-	imports = imports + fmt.Sprintf("%s \"gtf/scripts/%s\"\n", goBaseName, goBaseName)
-	pkgs = pkgs + fmt.Sprintf("\"%s\": new(%s.Test),\n", goBaseName, goBaseName)
+func appendExecuteInfo(fileName string, s scriptScheme) {
+	baseName := strings.TrimSuffix(fileName, ".go")
+	imports = imports + fmt.Sprintf("%s `gtf/scripts/%s`\n", baseName, baseName)
+	pkgs = pkgs + fmt.Sprintf("`%s`: new(%s.Test),\n", baseName, baseName)
 
-	if rep == 0 {
-		rep = 1 // Execute each test file at least one time.
+	if s.Repetitions == 0 {
+		// Execute each test file at least one time.
+		s.Repetitions = 1
 	}
-	repetitions = repetitions + fmt.Sprintf("\"%s\": %d,\n", goBaseName, rep)
+	repetitions = repetitions + fmt.Sprintf("`%s`: %d,\n", baseName, s.Repetitions)
 }
 
 func encloseExecuteInfo() {
@@ -82,7 +79,6 @@ func encloseExecuteInfo() {
 }
 
 func CompileExecuteGoFile(fileName string) {
-	var doComepile bool = true
 	var filePrefix = strings.TrimSuffix(fileName, ".go")
 	var execFileName = filePrefix + ".exe"
 	var pkgFileName = ` temp/` + filePrefix + ".a"
@@ -91,15 +87,12 @@ func CompileExecuteGoFile(fileName string) {
 		pkgModTime := common.GetFileModTime(common.GoBinDir, execFileName)
 		goModTime := common.GetFileModTime(`../execute/`, fileName)
 		if pkgModTime.After(goModTime) {
-			doComepile = false
+			return
 		}
 	}
 
-	if doComepile {
-		proLevel := os.Getenv("PROCESSOR_LEVEL")
-		common.ExecOSCmd("go tool %sg -o %s -I %s -pack ../execute/%s", proLevel, pkgFileName, common.GoPkgDir, fileName)
-		common.ExecOSCmd("go tool %sl -o %s%s -L %s%s", proLevel, common.GoBinDir, execFileName, common.GoPkgDir, pkgFileName)
-	}
+	common.ExecOSCmd("go tool %sg -o %s -I %s -pack ../execute/%s", common.ProcessorLevel, pkgFileName, common.GoPkgDir, fileName)
+	common.ExecOSCmd("go tool %sl -o %s%s -L %s%s", common.ProcessorLevel, common.GoBinDir, execFileName, common.GoPkgDir, pkgFileName)
 }
 
 func GenerateExecuteGoFile() {
