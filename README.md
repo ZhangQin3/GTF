@@ -1,6 +1,4 @@
 
---> GTF MUST be put under $gopath\src, NOT under $gopath\src\github.com\ZhangQin3. <--
-
 This is a generic test automation framework based on golang, it is named as Generic Test Framework(GTF). Now, GTF is in its very early stage, but it has provide most necessary features that a mature testing framework shall provide, it can be used in unit test, integration test, system test and acceptance test with only a little simple adaption.
 
 With GTF, one test script is a golang package in a single .go file, all the test scripts are put in the gtf/scripts directory. Related test scripts can get together and are put into a test suite, the test suite is also an .go file and a golang package located in the gtf/testsuites directory.
@@ -20,3 +18,4 @@ TBD:
 2. store test result to DB.
 
 Only support windows now.
+GTF MUST be put under directory $gopath\src.
