@@ -47,13 +47,13 @@ func CompileTestScripts() {
 
 	for _, obj := range scheme {
 		fileName := obj.Script
-		fmt.Println(fileName)
 
 		// Test file doex NOT exist.
 		if !common.DoesFileExist(common.ScriptsSrcDir, fileName) {
 			fmt.Println("[WARNNING]: Test file " + fileName + " does NOT exist!")
 			continue
 		}
+		fmt.Println(fileName)
 		common.CompileSingleFilePkg(fileName, common.ScriptsSrcDir, common.ScriptsPkgDir)
 		appendExecuteInfo(fileName, obj)
 	}
