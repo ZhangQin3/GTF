@@ -18,4 +18,5 @@ TBD:
 2. store test result to DB.
 
 Only support windows now.
+
 GTF MUST be put under directory $gopath\src.
