@@ -3,9 +3,9 @@ This is a generic test automation framework based on golang, it is named as Gene
 
 With GTF, one test script is a golang package in a single .go file, all the test scripts are put in the gtf/scripts directory. Related test scripts can get together and are put into a test suite, the test suite is also an .go file and a golang package located in the gtf/testsuites directory.
 
-GTF generates one executable file(.exe) for each test suite, the executable file is put in the $gopath/bin/ directory. To generate an executable file for a test suite, you should build and run ignition.go package in gtf/drivers/ignition directory, this will generate a .exe file and puts it in $gopath/bin/.
+GTF generates one executable file(.exe) for each test suite, the executable file is put in the $GOPATH/bin directory. To generate an executable file for a test suite, you should build and run ignition.go package in gtf/drivers/ignition directory, this will generate a .exe file and puts it in $GOPATH/bin.
 
-Run the executable file( execute.exe for now) in $gopath/bin/, all the tests related with the test suite will be executed and logs for each test scripts will be generated and put in $gopath/bin/.
+Run the executable file( execute.exe for now) in $GOPATH/bin/, all the tests related with the test suite will be executed and logs for each test scripts will be generated and put in $GOPATH/bin.
 
 GTF Provides:
 1) Test case level and test script level and test suite level setup and teardown.
@@ -19,4 +19,4 @@ TBD:
 
 Only support windows now.
 
-GTF MUST be put under directory $gopath\src.
+GTF MUST be put under directory $GOPATH/src.
