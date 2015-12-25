@@ -91,8 +91,8 @@ func CompileExecuteGoFile(fileName string) {
 		}
 	}
 
-	common.ExecOSCmd("go tool %sg -o %s -I %s -pack ../execute/%s", common.ProcessorLevel, pkgFileName, common.GoPkgDir, fileName)
-	common.ExecOSCmd("go tool %sl -o %s%s -L %s%s", common.ProcessorLevel, common.GoBinDir, execFileName, common.GoPkgDir, pkgFileName)
+	common.ExecOSCmd("go tool compile -o %s -I %s -pack ../execute/%s", pkgFileName, common.GoPkgDir, fileName)
+	common.ExecOSCmd("go tool link -o %s%s -L %s%s", common.GoBinDir, execFileName, common.GoPkgDir, pkgFileName)
 }
 
 func GenerateExecuteGoFile() {

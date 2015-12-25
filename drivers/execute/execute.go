@@ -1,7 +1,7 @@
 package main
 
 import (
-	test_verify_arrs_web `gtf/scripts/test_verify_arrs_web`
+	test_verify_arrs_web "gtf/scripts/test_verify_arrs_web"
 )
 
 import (

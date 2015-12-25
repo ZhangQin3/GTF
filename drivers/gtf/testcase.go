@@ -120,10 +120,10 @@ func (tc *testcase) callMethod(method string) {
 func getFunctionName(rv reflect.Value) (string, string) {
 	qualifiedFuncName := runtime.FuncForPC(rv.Pointer()).Name()
 
-	reg := regexp.MustCompile(`(\w+).*?\w+.(\w+)·fm`)
+	reg := regexp.MustCompile(`(\w+).*?\w+.(\w+)-fm`)
 	matchs := reg.FindStringSubmatch(qualifiedFuncName)
 	if matchs == nil {
-		panic("The qualified function name: " + qualifiedFuncName + `does NOT match the regexp: \w+.*?\w+.(\w)·fm.`)
+		panic("The qualified function name: " + qualifiedFuncName + ` does NOT match the regexp: \w+.*?\w+.(\w)-fm.`)
 	}
 	return matchs[1], matchs[2]
 }

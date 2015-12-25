@@ -16,11 +16,11 @@ var (
 	GoPkgDir         = PkgDir()
 	GoPath           = os.Getenv(`gopath`)
 	ScriptsPkgDir    = PkgDir() + `gtf\scripts\`
-	ScriptsSrcDir    = GoPath + `src\gtf\scripts\`
+	ScriptsSrcDir    = GoPath + `\src\gtf\scripts\`
 	TsPkgDir         = PkgDir() + `gtf\testsuites\`
-	TsSrcDir         = GoPath + `src\gtf\testsuites\`
+	TsSrcDir         = GoPath + `\src\gtf\testsuites\`
 	GtfPkgDir        = PkgDir() + `gtf\`
-	GoBinDir         = GoPath + `bin\`
+	GoBinDir         = GoPath + `\bin\`
 	GtfDriversPkgDir = PkgDir() + `gtf\drivers\`
 	ProcessorLevel   = os.Getenv(`PROCESSOR_LEVEL`)
 	DriversDir       = driversDir()
@@ -41,7 +41,7 @@ func CompileStdGoPkg(pkgName string) {
 func CompileMultiFilesPkg(dirName, pkgLocation string) {
 	files, _ := filepath.Glob(fmt.Sprintf(`..\%s\*.go`, dirName))
 	input := strings.Join(files, " ")
-	ExecOSCmd("go tool %sg -o %s%s.a -I %s -pack %s", ProcessorLevel, pkgLocation, dirName, GoPkgDir, input)
+	ExecOSCmd("go tool compile -o %s%s.a -I %s -pack %s", pkgLocation, dirName, GoPkgDir, input)
 }
 
 // CompileGoFile compiles packages with only single go file.
@@ -57,25 +57,25 @@ func CompileSingleFilePkg(fileName, fileDir, pkgLocation string) {
 		}
 	}
 
-	ExecOSCmd("go tool %sg -o %s%s -I %s -pack %s%s", ProcessorLevel, pkgLocation, pkgFileName, GoPkgDir, fileDir, fileName)
+	ExecOSCmd("go tool compile -o %s%s -I %s -pack %s%s", pkgLocation, pkgFileName, GoPkgDir, fileDir, fileName)
 }
 
 func CompileGtfCompiler() {
-	ExecOSCmd(`go tool 6g -o %scompiler.a -I %s -pack ..\compiler\compiler.go`, GoPkgDir, GoPkgDir)
-	ExecOSCmd(`go tool 6l -o %scompiler.exe -L %s %scompiler.a`, GoPkgDir, GoPkgDir, GoPkgDir)
+	ExecOSCmd(`go tool compile -o %scompiler.a -I %s -pack ..\compiler\compiler.go`, GoPkgDir, GoPkgDir)
+	ExecOSCmd(`go tool link -o %scompiler.exe -L %s %scompiler.a`, GoPkgDir, GoPkgDir, GoPkgDir)
 }
 
 func PkgDir() string {
 	if ProcessorLevel == "6" {
-		return fmt.Sprintf(`%spkg\windows_amd64\`, GoPath)
+		return fmt.Sprintf(`%s\pkg\windows_amd64\`, GoPath)
 	} else {
-		return fmt.Sprintf(`%spkg\windows_386\`, GoPath)
+		return fmt.Sprintf(`%s\pkg\windows_386\`, GoPath)
 	}
 }
 
 func BinDir() string {
 	gopath := os.Getenv("gopath")
-	return gopath + `bin\`
+	return gopath + `\bin\`
 }
 
 func driversDir() string {
