@@ -20,7 +20,8 @@ type scriptScheme struct {
 
 func main() {
 	compileGtfPkg()
-	common.CompileStdGoPkg("gtf/library/arrs")
+	// compile all packages in the directory gtf/library
+	common.CompileStdGoPkgInDir("gtf/library")
 	CompileTestScripts()
 	CompileExecuteGoFile("execute.go")
 

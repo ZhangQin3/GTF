@@ -19,6 +19,7 @@ var (
 	ScriptsSrcDir    = GoPath + `\src\gtf\scripts\`
 	TsPkgDir         = PkgDir() + `gtf\testsuites\`
 	TsSrcDir         = GoPath + `\src\gtf\testsuites\`
+	GtfSrcDir        = GoPath + `\src\`
 	GtfPkgDir        = PkgDir() + `gtf\`
 	GoBinDir         = GoPath + `\bin\`
 	GtfDriversPkgDir = PkgDir() + `gtf\drivers\`
@@ -35,6 +36,17 @@ func init() {
 // the StdGoPkg means a package which follows the requirements of go cmd tool
 func CompileStdGoPkg(pkgName string) {
 	ExecOSCmd(`go install ` + pkgName)
+}
+
+// the StdGoPkg means a package which follows the requirements of go cmd tool
+func CompileStdGoPkgInDir(dir string) {
+	full_dir := GtfSrcDir + dir
+	filepath.Walk(full_dir, func(fp string, fi os.FileInfo, err error) error {
+		if fi.IsDir() && fp != full_dir {
+			ExecOSCmd(`go install ` + dir + "/" + fi.Name())
+		}
+		return nil
+	})
 }
 
 // Compile all go files in a subdir of the dir drivers to a pkg and put the pkg to the pkgLocation
