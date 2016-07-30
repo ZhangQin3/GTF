@@ -25,10 +25,21 @@ func (t *Test) TestCaseProcedure() {
 
 /* ===================== Test Procedure ===================== */
 func (t *Test) VerifyPrototype(tcid string) {
-	log.Step(1, "Login github.")
+	log.Step(1, "Open github.")
 	p := github.OpenGithub()
 
+	log.Step(2, "Login github.")
 	p.SignIn().Click()
+	p.UserName().SetText("goautomation")
+	p.Password().SetText("0web.driver")
+	p.Signin().Click()
+
+	log.Step(3, "Create a new project")
+	p.NewProject().Click()
+
+	log.Step(4, "Logout")
+	p.Profile().Click()
+	p.Logout().Click()
 
 	// p.UserName().SetText("ddddddddd")
 

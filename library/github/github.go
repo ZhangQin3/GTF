@@ -12,11 +12,35 @@ func OpenGithub() Github {
 }
 
 func (p *Github) SignIn() *se.Element {
-	return p.Link(se.ByCssSelector, "a.btn.site-header-actions-btn.mr-2")
+	// return p.Link(se.ByCssSelector, "a.btn.site-header-actions-btn.mr-2")
+	return p.Link(se.ByLinkText, "Sign in")
 }
 
 func (p *Github) UserName() *se.Element {
-	return p.TextBox(se.ById, "user\\[login\\]")
+	return p.TextBox(se.ById, "login_field")
+}
+
+func (p *Github) Password() *se.Element {
+	return p.PasswordBox(se.ById, "password")
+}
+
+func (p *Github) Signin() *se.Element {
+	return p.SubmitBtn(se.ByValue, "Sign in")
+}
+
+func (p *Github) NewProject() *se.Element {
+	return p.Link(se.ByLinkText, "Start a project")
+	// return p.Link(se.ByValue, "Start a project")
+}
+
+func (p *Github) Profile() *se.Element {
+	// return p.Link(se.ByCssSelector, "a.header-nav-link.name.tooltipped.tooltipped-sw.js-menu-target")
+	return p.Link(se.ByClassName, "header-nav-link name tooltipped tooltipped-sw js-menu-target")
+}
+
+func (p *Github) Logout() *se.Element {
+	// return p.Button(se.ByClassName, "dropdown-item dropdown-signout")
+	return p.Form(se.ByClassName, "logout-form")
 }
 
 // func OpenWanSetup(wd se.WebDriver) {
@@ -25,20 +49,8 @@ func (p *Github) UserName() *se.Element {
 // 	println("====================", k)
 // }
 
-func (p *Github) Apply() *se.Element {
-	return p.Button(se.ByValue, "Apply")
-}
-
-// func (p *Github) UserName() *se.Element {
-// 	return p.TextBox(se.ById, "UserName")
-// }
-
 func (p *Github) Passord() *se.Element {
 	return p.PasswordBox(se.ById, "Password1")
-}
-
-func (p *Github) Logout() *se.Element {
-	return p.Link(se.ByLinkText, "ogout")
 }
 
 func (p *Github) HostName() *se.Element {
