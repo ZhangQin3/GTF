@@ -31,7 +31,7 @@ func (t *Test) SetParam(param string, value interface{}, flag ...paramFlag) {
 	}
 }
 
-func (t *Test) DefineCase(tcid, description string) *tcDef {
+func (t *Test) DefineTestCase(tcid, description string) *tcDef {
 	if t.tcDefs == nil {
 		t.tcDefs = make(map[string]*tcDef)
 	}

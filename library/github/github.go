@@ -12,7 +12,6 @@ func OpenGithub() Github {
 }
 
 func (p *Github) SignIn() *se.Element {
-	// return p.Link(se.ByCssSelector, "a.btn.site-header-actions-btn.mr-2")
 	return p.Link(se.ByLinkText, "Sign in")
 }
 
@@ -30,7 +29,6 @@ func (p *Github) Signin() *se.Element {
 
 func (p *Github) NewProject() *se.Element {
 	return p.Link(se.ByLinkText, "Start a project")
-	// return p.Link(se.ByValue, "Start a project")
 }
 
 func (p *Github) Profile() *se.Element {
@@ -39,7 +37,6 @@ func (p *Github) Profile() *se.Element {
 }
 
 func (p *Github) Logout() *se.Element {
-	// return p.Button(se.ByClassName, "dropdown-item dropdown-signout")
 	return p.Form(se.ByClassName, "logout-form")
 }
 
@@ -48,10 +45,6 @@ func (p *Github) Logout() *se.Element {
 // 	k := page.link(LinkText, "WAN Setup").Click()
 // 	println("====================", k)
 // }
-
-func (p *Github) Passord() *se.Element {
-	return p.PasswordBox(se.ById, "Password1")
-}
 
 func (p *Github) HostName() *se.Element {
 	return p.Table(se.ByClassName, "common_table").Tr(se.ByIndex, 1).Td(se.ByIndex, 1)

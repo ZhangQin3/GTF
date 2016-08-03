@@ -15,15 +15,14 @@ func (t *Test) SetTestParams() {
 }
 
 func (t *Test) CaseDefinitions() {
-	t.DefineCase("tcid001", "this is my first case.").R("BB")
+	t.DefineTestCase("tcid001", "this is my first case.").R("BB")
 }
 
-/* ===================== Testcase Procedure ===================== */
+/* ============================================================= */
 func (t *Test) TestCaseProcedure() {
 	t.ExecuteTestCase(t.VerifyPrototype, "tcid001")
 }
 
-/* ===================== Test Procedure ===================== */
 func (t *Test) VerifyPrototype(tcid string) {
 	log.Step(1, "Open github.")
 	p := github.OpenGithub()
