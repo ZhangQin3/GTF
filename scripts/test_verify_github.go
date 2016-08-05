@@ -25,7 +25,7 @@ func (t *Test) TestCaseProcedure() {
 
 func (t *Test) VerifyPrototype(tcid string) {
 	log.Step(1, "Open github.")
-	p := github.OpenGithub()
+	p, _ := github.OpenGithub()
 
 	log.Step(2, "Login github.")
 	p.SignIn().Click()

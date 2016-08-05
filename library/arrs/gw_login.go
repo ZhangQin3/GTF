@@ -6,7 +6,7 @@ type LoginPage struct{ se.Page }
 
 func OpenLoginPage() LoginPage {
 	url := "http://10.89.80.18:8080/"
-	page := se.OpenPage(url, nil)
+	page, _ := se.OpenPage(url, nil)
 
 	return LoginPage(page)
 }

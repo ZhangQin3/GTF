@@ -4,11 +4,11 @@ import "se"
 
 type Github struct{ se.Page }
 
-func OpenGithub() Github {
+func OpenGithub() (Github, error) {
 	url := "http://www.github.com/"
-	page := se.OpenPage(url, nil)
+	page, err := se.OpenPage(url, nil)
 
-	return Github(page)
+	return Github(page), err
 }
 
 func (p *Github) SignIn() *se.Element {
