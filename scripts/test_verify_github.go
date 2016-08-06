@@ -15,15 +15,34 @@ func (t *Test) SetTestParams() {
 }
 
 func (t *Test) CaseDefinitions() {
-	t.DefineTestCase("tcid001", "this is my first case.").R("BB")
+	t.DefineTestCase("tcid001", "Verify login to the github.")
 }
 
 /* ============================================================= */
 func (t *Test) TestCaseProcedure() {
-	t.ExecuteTestCase(t.VerifyPrototype, "tcid001")
+	t.ExecuteTestCase(t.VerifyLogin, "tcid001")
 }
 
-func (t *Test) VerifyPrototype(tcid string) {
+func (t *Test) VerifyLogin(tcid string) {
+	log.Step(1, "Open github.")
+	p, e := github.OpenGithub()
+	t.VerifyError(e)
+
+	t.Equal(1, 1)
+
+	log.Step(2, "Login github.")
+	e = p.SignIn().Click()
+	t.VerifyError(e)
+	p.UserName().SetText("goautomation")
+	p.Password().SetText("0web.driver")
+	p.Signin().Click()
+
+	log.Step(3, "Logout")
+	p.Profile().Click()
+	p.Logout().Click()
+}
+
+func (t *Test) VerifyTest(tcid string) {
 	log.Step(1, "Open github.")
 	p, _ := github.OpenGithub()
 
@@ -81,8 +100,8 @@ func (t *Test) VerifyPrototypeCleanupOnCrash() {
 
 }
 
-func (t *Test) VerifyPrototypeCleanup() {
-
+func (t *Test) VerifyLoginCleanup() {
+	log.Warning("ddddddddddddddddddddddd")
 }
 
 func (t *Test) TestCaseProcedureCleanup() {
