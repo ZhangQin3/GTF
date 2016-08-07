@@ -4,9 +4,9 @@ import "se"
 
 type Github struct{ se.Page }
 
-func OpenGithub() (Github, error) {
+func OpenGithub(params ...func(caps map[string]interface{})) (Github, error) {
 	url := "http://www.github.com/"
-	page, err := se.OpenPage(url, nil)
+	page, err := se.OpenPage(url, nil, params...)
 
 	return Github(page), err
 }

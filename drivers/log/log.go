@@ -56,3 +56,8 @@ func Debug(v ...interface{}) {
 func Debugf(format string, v ...interface{}) {
 	log.Output("DEBUG", LFileAndConsole, fmt.Sprintf(format, v...))
 }
+
+func DoPanic(err error) {
+	Warning("panic here", err)
+	panic(err)
+}

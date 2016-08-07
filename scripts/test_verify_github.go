@@ -1,9 +1,11 @@
 package git
 
 import (
+	"gtf/drivers/assert"
 	"gtf/drivers/gtf"
 	"gtf/drivers/log"
 	"gtf/library/github"
+	"se"
 )
 
 type Test struct{ gtf.Test }
@@ -16,24 +18,25 @@ func (t *Test) SetTestParams() {
 
 func (t *Test) CaseDefinitions() {
 	t.DefineTestCase("tcid001", "Verify login to the github.")
+	t.DefineTestCase("tcid002", "Create a github project.")
 }
 
 /* ============================================================= */
 func (t *Test) TestCaseProcedure() {
 	t.ExecuteTestCase(t.VerifyLogin, "tcid001")
+	// t.ExecuteTestCase(t.VerifyCreateProject, "tcid002")
 }
 
 func (t *Test) VerifyLogin(tcid string) {
 	log.Step(1, "Open github.")
-	p, e := github.OpenGithub()
-	t.VerifyError(e)
-
-	t.Equal(1, 1)
+	p, e := github.OpenGithub(se.Browsername("firefox"))
+	assert.Nil(e)
+	defer p.Close()
 
 	log.Step(2, "Login github.")
 	e = p.SignIn().Click()
-	t.VerifyError(e)
-	p.UserName().SetText("goautomation")
+	assert.Nil(e)
+	p.UserName().SetText("goautomation", se.PreClear)
 	p.Password().SetText("0web.driver")
 	p.Signin().Click()
 
@@ -42,9 +45,10 @@ func (t *Test) VerifyLogin(tcid string) {
 	p.Logout().Click()
 }
 
-func (t *Test) VerifyTest(tcid string) {
+func (t *Test) VerifyCreateProject(tcid string) {
 	log.Step(1, "Open github.")
 	p, _ := github.OpenGithub()
+	defer p.Close()
 
 	log.Step(2, "Login github.")
 	p.SignIn().Click()
@@ -96,14 +100,14 @@ func (t *Test) VerifyTest(tcid string) {
 }
 
 /* ===================== Test Cleanup ===================== */
-func (t *Test) VerifyPrototypeCleanupOnCrash() {
-
+func (t *Test) VerifyLoginCleanupOnCrash() {
+	log.Warning("VerifyLoginCleanupOnCrash is called")
 }
 
 func (t *Test) VerifyLoginCleanup() {
-	log.Warning("ddddddddddddddddddddddd")
+	log.Warning("VerifyLoginCleanup is called")
 }
 
 func (t *Test) TestCaseProcedureCleanup() {
-
+	log.Warning("TestCaseProcedureCleanup is called")
 }

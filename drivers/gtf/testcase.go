@@ -120,10 +120,10 @@ func (tc *testcase) callMethod(method string) {
 func getFunctionName(rv reflect.Value) (string, string) {
 	qualifiedFuncName := runtime.FuncForPC(rv.Pointer()).Name()
 
-	reg := regexp.MustCompile(`(\w+).*?\w+.(\w+)-fm`)
+	reg := regexp.MustCompile(`(\w+).*?\w+\.\(\*Test\)\.(\w+)-fm`)
 	matchs := reg.FindStringSubmatch(qualifiedFuncName)
 	if matchs == nil {
-		panic("The qualified function name: " + qualifiedFuncName + ` does NOT match the regexp: \w+.*?\w+.(\w)-fm.`)
+		panic("The qualified function name: " + qualifiedFuncName + ` does NOT match the regexp: (\w+).*?\w+\.\(\*Test\)\.(\w+)-fm.`)
 	}
 	return matchs[1], matchs[2]
 }
@@ -187,6 +187,22 @@ func (tc *testcase) logFailedSteps(failedSteps string) {
 }
 
 func (tc *testcase) logStackTrace(buf []byte) {
+	/* TODO: enhance it if possible. */
+	var l = tc.testScript.logger
+	l.CloseFile()
+	content, err := ioutil.ReadFile(l.FileName())
+	if err != nil {
+		panic(err)
+	}
+	regexpTcSummary := regexp.MustCompile(`panic here`)
+	var b bytes.Buffer
+	if err := l.GetTemplate().ExecuteTemplate(&b, "PANIC", fmt.Sprintf("%s\n", buf)); err != nil {
+		panic(err)
+	}
+	content = regexpTcSummary.ReplaceAll(content, b.Bytes())
+	ioutil.WriteFile(l.FileName(), content, 0666)
+	l.ReopenFile()
+
 	tc.testScript.logger.Output("PANIC", log.LFileAndConsole, fmt.Sprintf("%s\n", buf))
 }
 
