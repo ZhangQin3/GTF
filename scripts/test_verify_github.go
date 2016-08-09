@@ -29,13 +29,13 @@ func (t *Test) TestCaseProcedure() {
 
 func (t *Test) VerifyLogin(tcid string) {
 	log.Step(1, "Open github.")
-	p, e := github.OpenGithub(se.Browsername("firefox"))
+	p, e := github.OpenGithub(se.Browsername("chrome"))
 	assert.Nil(e)
 	defer p.Close()
 
 	log.Step(2, "Login github.")
 	e = p.SignIn().Click()
-	assert.Nil(e)
+	log.DoPanic(e)
 	p.UserName().SetText("goautomation", se.PreClear)
 	p.Password().SetText("0web.driver")
 	p.Signin().Click()

@@ -187,23 +187,28 @@ func (tc *testcase) logFailedSteps(failedSteps string) {
 }
 
 func (tc *testcase) logStackTrace(buf []byte) {
-	/* TODO: enhance it if possible. */
 	var l = tc.testScript.logger
-	l.CloseFile()
-	content, err := ioutil.ReadFile(l.FileName())
-	if err != nil {
-		panic(err)
-	}
-	regexpTcSummary := regexp.MustCompile(`panic here`)
-	var b bytes.Buffer
-	if err := l.GetTemplate().ExecuteTemplate(&b, "PANIC", fmt.Sprintf("%s\n", buf)); err != nil {
-		panic(err)
-	}
-	content = regexpTcSummary.ReplaceAll(content, b.Bytes())
-	ioutil.WriteFile(l.FileName(), content, 0666)
-	l.ReopenFile()
+	panicLoc := l.PanicLocation()
+	if panicLoc == nil {
+		l.Output("PANIC", log.LFileAndConsole, fmt.Sprintf("%s\n", buf))
+	} else {
 
-	tc.testScript.logger.Output("PANIC", log.LFileAndConsole, fmt.Sprintf("%s\n", buf))
+		/* TODO: enhance it if possible. */
+		l.CloseFile()
+		content, err := ioutil.ReadFile(l.FileName())
+		if err != nil {
+			panic(err)
+		}
+		regexpTcSummary := regexp.MustCompile(fmt.Sprintf("%s\n", panicLoc))
+		var b bytes.Buffer
+		if err := l.GetTemplate().ExecuteTemplate(&b, "PANIC", fmt.Sprintf("%s\n", buf)); err != nil {
+			panic(err)
+		}
+		content = regexpTcSummary.ReplaceAll(content, b.Bytes())
+		ioutil.WriteFile(l.FileName(), content, 0666)
+		l.ReopenFile()
+		l.NilPanicLocation()
+	}
 }
 
 func (tc *testcase) logHorizonLine() {

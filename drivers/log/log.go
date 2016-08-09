@@ -2,6 +2,8 @@ package log
 
 import (
 	"fmt"
+	"gtf/drivers/uuid"
+	// "runtime"
 )
 
 type flags int
@@ -57,7 +59,23 @@ func Debugf(format string, v ...interface{}) {
 	log.Output("DEBUG", LFileAndConsole, fmt.Sprintf(format, v...))
 }
 
+func plainText(v ...interface{}) {
+	log.Output("PLAINTEXT", LFileAndConsole, fmt.Sprintln(v...))
+}
+
 func DoPanic(err error) {
-	Warning("panic here", err)
+	// defer func() {
+	// 	if err := recover(); err != nil {
+	// 		Error(err)
+	// 		var buf []byte = make([]byte, 1500)
+	// 		runtime.Stack(buf, true)
+	// 		Warning("===========================-------------------------")
+	// 		log.Output("PANIC", LFileAndConsole, fmt.Sprintf("%s\n", buf))
+	// 	}
+	// }()
+	Warning("===========================-------------------------123")
+	uuid := uuid.Rand()
+	log.panicLocation = &uuid
+	plainText(fmt.Sprintf("%s", uuid))
 	panic(err)
 }

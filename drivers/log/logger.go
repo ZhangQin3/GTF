@@ -1,6 +1,7 @@
 package log
 
 import (
+	"gtf/drivers/uuid"
 	"io"
 	"os"
 	"sync"
@@ -12,15 +13,16 @@ import (
 // the Writer's Write method.  A Logger can be used simultaneously from
 // multiple goroutines; it guarantees to serialize access to the Writer.
 type Logger struct {
-	mu          sync.Mutex // ensures atomic writes; protects the following fields.
-	text        string     // for accumulating text to write
-	stdOut      io.Writer  // destination for output
-	file        *os.File   // file destination for the output, if any.
-	fileName    string
-	template    *template.Template // the template used to writ log to file
-	Steps       []*tcStep
-	currentStep *tcStep
-	metaIndex   map[string]string // used to handle repeated step index.
+	mu            sync.Mutex // ensures atomic writes; protects the following fields.
+	text          string     // for accumulating text to write
+	stdOut        io.Writer  // destination for output
+	file          *os.File   // file destination for the output, if any.
+	fileName      string
+	template      *template.Template // the template used to writ log to file
+	Steps         []*tcStep
+	currentStep   *tcStep
+	metaIndex     map[string]string // used to handle repeated step index.
+	panicLocation *uuid.UUID
 }
 
 type TestcaseHdr struct {
@@ -146,4 +148,12 @@ func (l *Logger) GenerateStep(index, description string) {
 func (l *Logger) CleanupSteps() {
 	l.Steps = l.Steps[0:0]
 	l.metaIndex = nil
+}
+
+func (l *Logger) PanicLocation() *uuid.UUID {
+	return l.panicLocation
+}
+
+func (l *Logger) NilPanicLocation() {
+	l.panicLocation = nil
 }
