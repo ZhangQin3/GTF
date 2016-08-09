@@ -2,8 +2,9 @@ package log
 
 import (
 	"fmt"
-	"gtf/drivers/uuid"
-	// "runtime"
+	"reflect"
+	"runtime"
+	"time"
 )
 
 type flags int
@@ -73,9 +74,39 @@ func DoPanic(err error) {
 	// 		log.Output("PANIC", LFileAndConsole, fmt.Sprintf("%s\n", buf))
 	// 	}
 	// }()
-	Warning("===========================-------------------------123")
-	uuid := uuid.Rand()
-	log.panicLocation = &uuid
-	plainText(fmt.Sprintf("%s", uuid))
-	panic(err)
+	if err != nil {
+		t := time.Now().UnixNano()
+		log.panicTime = t
+		plainText(fmt.Sprintf("panic_here_%d", t))
+		panic(err)
+	}
+}
+
+func DoCatch(f interface{}, params ...interface{}) {
+	method := reflect.ValueOf(f)
+
+	if method.Kind() != reflect.Func {
+		panic("The first param of the gtf.Execute must be a testcase method!")
+	}
+
+	len := len(params)
+	vParams := make([]reflect.Value, len)
+	if len != 0 {
+		for i := 0; i < len; i++ {
+			vParams[i] = reflect.ValueOf((params)[i])
+		}
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			Error(err)
+			var buf []byte = make([]byte, 1500)
+			runtime.Stack(buf, true)
+			Warning("===========================-------------------------")
+			log.Output("PANIC", LFileAndConsole, fmt.Sprintf("%s\n", buf))
+		}
+	}()
+
+	ret := method.Call(vParams)
+	Warning("--------", ret[0])
 }

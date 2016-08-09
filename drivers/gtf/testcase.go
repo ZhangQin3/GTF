@@ -54,11 +54,21 @@ func (tc *testcase) runTcMethod() {
 	var l = tc.testScript.logger
 	defer func() {
 		if err := recover(); err != nil {
-			log.Error(err)
+			var b bytes.Buffer
+			if err := l.GetTemplate().ExecuteTemplate(&b, "ERROR", fmt.Sprintf("%s\n%s\n", err, "===========================-------------------------")); err != nil {
+				log.Error(err)
+				panic(err)
+			}
+			fmt.Printf("%s", b)
+
 			var buf []byte = make([]byte, 1500)
 			runtime.Stack(buf, true)
-			log.Warning("===========================-------------------------")
-			tc.logStackTrace(buf)
+			if err := l.GetTemplate().ExecuteTemplate(&b, "PANIC", fmt.Sprintf("%s\n", buf)); err != nil {
+				log.Error(err)
+				panic(err)
+			}
+
+			tc.logStackTrace(b.Bytes())
 
 			/* Call testcase cleanup on crash methed if testcase method of cleanup method panics. */
 			if !flagCleanupCalled {
@@ -188,26 +198,21 @@ func (tc *testcase) logFailedSteps(failedSteps string) {
 
 func (tc *testcase) logStackTrace(buf []byte) {
 	var l = tc.testScript.logger
-	panicLoc := l.PanicLocation()
-	if panicLoc == nil {
+	t := l.PanicTime()
+	if t == 0 {
 		l.Output("PANIC", log.LFileAndConsole, fmt.Sprintf("%s\n", buf))
 	} else {
-
+		l.ZeroPanicTime()
 		/* TODO: enhance it if possible. */
 		l.CloseFile()
 		content, err := ioutil.ReadFile(l.FileName())
 		if err != nil {
 			panic(err)
 		}
-		regexpTcSummary := regexp.MustCompile(fmt.Sprintf("%s\n", panicLoc))
-		var b bytes.Buffer
-		if err := l.GetTemplate().ExecuteTemplate(&b, "PANIC", fmt.Sprintf("%s\n", buf)); err != nil {
-			panic(err)
-		}
-		content = regexpTcSummary.ReplaceAll(content, b.Bytes())
+		regexpTcSummary := regexp.MustCompile(fmt.Sprintf("panic_here_%d", t))
+		content = regexpTcSummary.ReplaceAll(content, buf)
 		ioutil.WriteFile(l.FileName(), content, 0666)
 		l.ReopenFile()
-		l.NilPanicLocation()
 	}
 }
 
