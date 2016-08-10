@@ -36,12 +36,18 @@ type TestScriptHdr struct {
 	Text string
 }
 
+type TestScriptTlr struct {
+	Time string
+	Text string
+}
+
 type TestResultSummary struct {
 	TcID        string
 	Description string
 	Result      bool
 	FailedSteps string
 	TcAnchor    int64
+	Duration    string // minute
 }
 
 type stepInfo struct {
@@ -84,7 +90,7 @@ func (l *Logger) Output(level string, flags flags, info interface{}) {
 	case stepInfo:
 		l.text = v.Text
 		data = v
-	case TestcaseHdr, TestScriptHdr, toggleText, toggleImage:
+	case TestcaseHdr, TestScriptHdr, TestScriptTlr, toggleText, toggleImage:
 		data = v
 	default:
 		panic("Log.Output: Can't accept the info type.")

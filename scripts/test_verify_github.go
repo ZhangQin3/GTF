@@ -24,7 +24,7 @@ func (t *Test) CaseDefinitions() {
 /* ============================================================= */
 func (t *Test) TestCaseProcedure() {
 	t.ExecuteTestCase(t.VerifyLogin, "tcid001")
-	t.ExecuteTestCase(t.VerifyCreateProject, "tcid002")
+	// t.ExecuteTestCase(t.VerifyCreateProject, "tcid002")
 }
 
 func (t *Test) VerifyLogin(tcid string) {
@@ -110,13 +110,13 @@ func (t *Test) VerifyCreateProject(tcid string) {
 
 /* ===================== Test Cleanup ===================== */
 func (t *Test) VerifyLoginCleanupOnCrash() {
-	log.Warning("VerifyLoginCleanupOnCrash is called")
+	log.Info("VerifyLoginCleanupOnCrash is called")
 }
 
 func (t *Test) VerifyLoginCleanup() {
-	log.Warning("VerifyLoginCleanup is called")
+	log.Info("VerifyLoginCleanup is called")
 }
 
 func (t *Test) TestCaseProcedureCleanup() {
-	log.Warning("TestCaseProcedureCleanup is called")
+	log.Info("TestCaseProcedureCleanup is called")
 }

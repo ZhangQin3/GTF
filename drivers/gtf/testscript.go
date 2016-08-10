@@ -1,6 +1,7 @@
 package gtf
 
 import (
+	"fmt"
 	"gtf/drivers/common"
 	"gtf/drivers/log"
 	tsuite "gtf/testsuites/tsuite"
@@ -13,10 +14,12 @@ var currentScript *testScript
 
 /* Contains the data for each test script */
 type testScript struct {
-	fileName string         /* test script file name without suffix(.go). */
-	tTest    *reflect.Value /* the the pointer to the instance of the Test struct in the test script */
-	tSuite   *tsuite.TSuite
-	logger   *log.Logger /* logger for each test script.  */
+	fileName  string         /* test script file name without suffix(.go). */
+	tTest     *reflect.Value /* the the pointer to the instance of the Test struct in the test script */
+	tSuite    *tsuite.TSuite
+	logger    *log.Logger /* logger for each test script.  */
+	startTime time.Time
+	// endTime   time.Time
 }
 
 func newTestScript(fileName string, tTest interface{}, ts *tsuite.TSuite) *testScript {
@@ -37,15 +40,20 @@ func (s *testScript) initLogger() {
 
 /* Log a test script information in the report file. */
 func (s *testScript) logHeader() {
-	s.logger.Output("LOG_HEADER",
-		log.LOnlyFile,
-		log.TestScriptHdr{
-			time.Now().String(),
-			s.fileName,
-		})
+	s.startTime = time.Now()
+	data := log.TestScriptHdr{
+		s.startTime.String(),
+		s.fileName,
+	}
+	s.logger.Output("LOG_HEADER", log.LOnlyFile, data)
 }
 func (s *testScript) logTailer() {
-	s.logger.Output("LOG_TAILER", log.LOnlyFile, nil)
+	end := time.Now()
+	data := log.TestScriptTlr{
+		end.String(),
+		fmt.Sprintf("%.2f", end.Sub(s.startTime).Minutes()),
+	}
+	s.logger.Output("LOG_TAILER", log.LOnlyFile, data)
 }
 
 /* fieldName is the field name of Test in test.go, tTest promotes them. */

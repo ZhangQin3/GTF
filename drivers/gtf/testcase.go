@@ -186,12 +186,14 @@ func (tc *testcase) logHeader() {
 func (tc *testcase) testResultSummary(failedSteps string) bytes.Buffer {
 	end := time.Now()
 	tc.endTime = end
+	duration := end.Sub(tc.startTime)
 	data := log.TestResultSummary{
 		tc.tcid,
 		tc.description,
 		failedSteps == "",
 		failedSteps,
 		tc.startTime.UnixNano(),
+		fmt.Sprintf("%.2f", duration.Minutes()),
 	}
 	var buf bytes.Buffer
 	if err := tc.testScript.logger.GetTemplate().ExecuteTemplate(&buf, "RESULT_SUMMARY", data); err != nil {
