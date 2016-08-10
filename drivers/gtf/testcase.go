@@ -21,6 +21,8 @@ type testcase struct {
 	cleaupMethod  string           /* method name , if any, called if the testcase method ends normally, to clean up the test environment. */
 	onCrashMethod string           /* method name , if any, called if the testcase method crashed. */
 	testScript    *testScript
+	startTime     time.Time
+	endTime       time.Time
 }
 
 // tcTestLogicMethod: the real test method with test case's test logic
@@ -168,22 +170,28 @@ func (tc *testcase) logResult() {
 }
 
 func (tc *testcase) logHeader() {
+	start := time.Now()
+	tc.startTime = start
 	tc.testScript.logger.Output("TC_HEADER",
 		log.LOnlyFile,
 		log.TestcaseHdr{
 			tc.tcid,
-			time.Now().Format("2006-01-02 15:04:05"),
+			start.Format("2006-01-02 15:04:05"),
 			tc.description,
+			start.UnixNano(),
 		})
 }
 
 /* Here only input failedStps, if failedStps != "" indicates there is some error happened. */
 func (tc *testcase) testResultSummary(failedSteps string) bytes.Buffer {
+	end := time.Now()
+	tc.endTime = end
 	data := log.TestResultSummary{
 		tc.tcid,
 		tc.description,
 		failedSteps == "",
 		failedSteps,
+		tc.startTime.UnixNano(),
 	}
 	var buf bytes.Buffer
 	if err := tc.testScript.logger.GetTemplate().ExecuteTemplate(&buf, "RESULT_SUMMARY", data); err != nil {

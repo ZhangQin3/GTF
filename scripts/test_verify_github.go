@@ -24,28 +24,27 @@ func (t *Test) CaseDefinitions() {
 /* ============================================================= */
 func (t *Test) TestCaseProcedure() {
 	t.ExecuteTestCase(t.VerifyLogin, "tcid001")
-	// t.ExecuteTestCase(t.VerifyCreateProject, "tcid002")
+	t.ExecuteTestCase(t.VerifyCreateProject, "tcid002")
 }
 
 func (t *Test) VerifyLogin(tcid string) {
 	log.Step(1, "Open github.")
-	_, e := github.OpenGithub(se.Browsername("chrome"))
+	p, e := github.OpenGithub(se.Browsername("chrome"))
 	assert.Nil(e)
+	defer p.Close()
 
-	log.DoCatch(ttt, 1, 2)
+	// log.DoCatch(ttt, 1, 2)
 
-	// defer p.Close()
+	log.Step(2, "Login github.")
+	e = p.SignIn().Click()
+	log.DoPanic(e)
+	p.UserName().SetText("goautomation", se.PreClear)
+	p.Password().SetText("0web.driver")
+	p.Signin().Click()
 
-	// log.Step(2, "Login github.")
-	// e = p.SignIn().Click()
-	// log.DoPanic(e)
-	// p.UserName().SetText("goautomation", se.PreClear)
-	// p.Password().SetText("0web.driver")
-	// p.Signin().Click()
-
-	// log.Step(3, "Logout")
-	// p.Profile().Click()
-	// p.Logout().Click()
+	log.Step(3, "Logout")
+	p.Profile().Click()
+	p.Logout().Click()
 }
 
 func ttt(a, b int) int {

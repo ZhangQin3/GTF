@@ -69,6 +69,7 @@ Test Start: {{.Time}} </br>
 {{end}}
 
 {{define "TC_HEADER"}}
+<a name="a{{.Anchor}}">
 <div id= 'testcase_heading' name='testcase_heading' >
 </br><table summary='' class='log_heading_table'>
 <tr class='log_heading_table_th'><td> TCID: {{.TcID}} for B05.A.1 -- {{.Text}} </td></tr>
@@ -76,6 +77,7 @@ Test Start: {{.Time}} </br>
 <tr> <td class='log_heading_table_td'> {{.Time}} </td> </tr>
 </table>
 </div>
+</a>
 {{end}}
 
 {{define "HORIZON"}}
@@ -96,7 +98,7 @@ Test Start: {{.Time}} </br>
   <td  style="background :  ; color : black" name="tcid" align="left" >{{.TcID}}</td>
   <td  style="background :  ; color : black" name="action" align="left" >{{.Description}}</td>
   <td  style="background :  ; color : black" name="description" align="left" >{{.Description}} {{if .FailedSteps}}<br>Fail reason: Failed steps:{{.FailedSteps}}{{end}}<br></td>
-  <td class={{if .FailedSteps}}"fail" {{else}}"pass"{{end}} name="result" align="left" >{{if .FailedSteps}}FAILED{{else}}PASS{{end}}</a></td>
+  <td class={{if .FailedSteps}}"fail" {{else}}"pass"{{end}} name="result" align="left" ><a href="#a{{.TcAnchor}}">{{if .FailedSteps}}FAILED{{else}}PASS{{end}}</a></td>
   <td  style="background :  ; color : black" name="Duration" align="left" >0.00</td>
 </tr>
 <div style="display:none">hide</div>

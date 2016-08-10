@@ -25,9 +25,10 @@ type Logger struct {
 }
 
 type TestcaseHdr struct {
-	TcID string
-	Time string
-	Text string
+	TcID   string
+	Time   string
+	Text   string
+	Anchor int64
 }
 
 type TestScriptHdr struct {
@@ -40,6 +41,7 @@ type TestResultSummary struct {
 	Description string
 	Result      bool
 	FailedSteps string
+	TcAnchor    int64
 }
 
 type stepInfo struct {

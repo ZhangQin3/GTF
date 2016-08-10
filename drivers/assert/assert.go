@@ -9,22 +9,22 @@ import (
 
 // assert that the expression expr is true
 func True(expr bool, args ...interface{}) {
-	assert(expr, args, []interface{}{"The expression is not true, it is [%T:%[1]v]", expr})
+	assert(expr, args, []interface{}{"Expect true, but get false: [%T:%[1]v]", expr})
 }
 
 // assert that the expression expr is false
 func False(expr bool, args ...interface{}) {
-	assert(!expr, args, []interface{}{"The expression is not false, it is [%T:%[1]v]", expr})
+	assert(!expr, args, []interface{}{"Expect false, but get true: [%T:%[1]v]", expr})
 }
 
 // assert that the expression expr is nil
 func Nil(expr interface{}, args ...interface{}) {
-	assert(isNil(expr), args, []interface{}{"The expression is not nil，actual value:[%T:%[1]v]", expr})
+	assert(isNil(expr), args, []interface{}{"Expect nil，but get a value: [%T:%[1]v]", expr})
 }
 
 // assert that the expression expr is not nil
 func NotNil(expr interface{}, args ...interface{}) {
-	assert(!isNil(expr), args, []interface{}{"The expression is nil，actual value: [%T:%[1]v]", expr})
+	assert(!isNil(expr), args, []interface{}{"Expect non-nil, but get a nil: [%T:%[1]v]", expr})
 }
 
 // assert that actual and expected is equal
@@ -73,21 +73,21 @@ func NotContains(container, item interface{}, args ...interface{}) {
 	assert(!isContains(container, item), args, []interface{}{"container:[%v] contains item: [%v]", container, item})
 }
 
-// 断言函数会发生panic，否则输出错误信息。
+// assert there is a panic
 func Panic(fn func(), args ...interface{}) {
 	has, _ := hasPanic(fn)
-	assert(has, args, []interface{}{"并未发生panic"})
+	assert(has, args, []interface{}{"No panic"})
 }
 
-// 断言函数会发生panic，且panic信息中包含指定的字符串内容，否则输出错误信息。
+// assert there is a panic, and there is a specific string in the panic infomation
 func PanicString(fn func(), str string, args ...interface{}) {
 	if has, msg := hasPanic(fn); has {
 		index := strings.Index(fmt.Sprint(msg), str)
-		assert(index >= 0, args, []interface{}{"并未发生panic"})
+		assert(index >= 0, args, []interface{}{"No expected panic"})
 	}
 }
 
-// 断言函数会发生panic，且panic返回的类型与typ的类型相同。
+// assert there is a panic, and the return type of the panic is same with type of typ
 func PanicType(fn func(), typ interface{}, args ...interface{}) {
 	has, msg := hasPanic(fn)
 	if !has {
@@ -96,12 +96,12 @@ func PanicType(fn func(), typ interface{}, args ...interface{}) {
 
 	t1 := reflect.TypeOf(msg)
 	t2 := reflect.TypeOf(typ)
-	assert(t1 == t2, args, []interface{}{"PanicType失败，v1[%v]的类型与v2[%v]的类型不相同", t1, t2})
+	assert(t1 == t2, args, []interface{}{"PanicType failed，v1[%v] != [%v]", t1, t2})
 
 }
 
-// 断言函数会发生panic，否则输出错误信息。
+// assert there is no panic
 func NotPanic(fn func(), args ...interface{}) {
 	has, msg := hasPanic(fn)
-	assert(!has, args, []interface{}{"发生了panic，其信息为[%v]", msg})
+	assert(!has, args, []interface{}{"There is a panic，info: [%v]", msg})
 }
