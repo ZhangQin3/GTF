@@ -17,6 +17,7 @@ const (
 
 type Test struct {
 	tcDefs       map[string]*tcDef
+	DataFile     string
 	DemoVariable string
 }
 
@@ -29,6 +30,10 @@ func (t *Test) SetParam(param string, value interface{}, flag ...paramFlag) {
 	if _, ok := TestParams[param]; !ok || (len(flag) == 1 && flag[0] == Overridable) {
 		TestParams[param] = value
 	}
+}
+
+func (t *Test) SetDataFile(file string) {
+	t.DataFile = file
 }
 
 func (t *Test) DefineTestCase(tcid, description string) *tcDef {

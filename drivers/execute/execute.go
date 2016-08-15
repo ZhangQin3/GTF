@@ -1,7 +1,7 @@
 package main
 
 import (
-	test_verify_github "gtf/scripts/test_verify_github"
+	test_verify_csvdata "gtf/scripts/test_verify_csvdata"
 )
 
 import (
@@ -10,11 +10,11 @@ import (
 
 func main() {
 	gtf.TestSuiteSchema.TestScripts = map[string]interface{}{
-		`test_verify_github`: new(test_verify_github.Test),
+		`test_verify_csvdata`: new(test_verify_csvdata.Test),
 	}
 
 	gtf.TestSuiteSchema.Repetitions = map[string]int{
-		`test_verify_github`: 1,
+		`test_verify_csvdata`: 1,
 	}
 
 	gtf.GtfMain()
