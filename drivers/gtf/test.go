@@ -7,6 +7,7 @@ import (
 	"gtf/drivers/common"
 	"gtf/drivers/csvdata"
 	"gtf/drivers/log"
+	"io"
 	"reflect"
 )
 
@@ -44,8 +45,27 @@ func (t *Test) DefineTestCase(tcid, description string) *tcDef {
 	if t.tcDefs == nil {
 		t.tcDefs = make(map[string]*tcDef)
 	}
+
 	d := &tcDef{tcid: tcid, description: description}
 	t.tcDefs[tcid] = d
+	return d
+}
+
+func (t *Test) GenDataTestCase(tcid, descrFormat string, args ...string) *tcDef {
+	if t.tcDefs == nil {
+		t.tcDefs = make(map[string]*tcDef)
+	}
+
+	for {
+		m, err := t.Read()
+		if err == io.EOF {
+			break
+		}
+		d := &tcDef{tcid: tcid, description: description}
+		t.tcDefs[tcid] = d
+	}
+	// d := &tcDef{tcid: tcid, description: description}
+	// t.tcDefs[tcid] = d
 	return d
 }
 
