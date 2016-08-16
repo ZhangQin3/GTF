@@ -17,6 +17,7 @@ var (
 	GoPath           = os.Getenv(`gopath`)
 	ScriptsPkgDir    = PkgDir() + `gtf\scripts\`
 	ScriptsSrcDir    = GoPath + `\src\gtf\scripts\`
+	DataFilesDir     = GoPath + `\src\gtf\datafiles\`
 	TsPkgDir         = PkgDir() + `gtf\testsuites\`
 	TsSrcDir         = GoPath + `\src\gtf\testsuites\`
 	GtfSrcDir        = GoPath + `\src\`

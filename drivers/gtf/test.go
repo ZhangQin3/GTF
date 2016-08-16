@@ -4,6 +4,8 @@ package gtf
 
 import (
 	"fmt"
+	"gtf/drivers/common"
+	"gtf/drivers/csvdata"
 	"gtf/drivers/log"
 	"reflect"
 )
@@ -17,7 +19,8 @@ const (
 
 type Test struct {
 	tcDefs       map[string]*tcDef
-	DataFile     string
+	dataFile     string
+	DataReader   *csvdata.Reader
 	DemoVariable string
 }
 
@@ -33,7 +36,8 @@ func (t *Test) SetParam(param string, value interface{}, flag ...paramFlag) {
 }
 
 func (t *Test) SetDataFile(file string) {
-	t.DataFile = file
+	t.dataFile = file
+	t.DataReader = csvdata.NewReader(common.DataFilesDir + file)
 }
 
 func (t *Test) DefineTestCase(tcid, description string) *tcDef {

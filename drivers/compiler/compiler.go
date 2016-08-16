@@ -32,6 +32,7 @@ func main() {
 func compileGtfPkg() {
 	common.CompileStdGoPkg("gtf/drivers/log")
 	common.CompileStdGoPkg("gtf/drivers/assert")
+	common.CompileStdGoPkg("gtf/drivers/csvdata")
 	common.CompileStdGoPkg("gtf/drivers/uuid")
 	common.CompileMultiFilesPkg("gtf", common.GtfDriversPkgDir)
 }
