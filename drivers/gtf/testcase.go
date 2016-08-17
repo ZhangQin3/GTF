@@ -2,6 +2,7 @@ package gtf
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"gtf/drivers/log"
 	"io/ioutil"
@@ -38,6 +39,7 @@ func newTestCase(tcTestLogicMethod interface{}, tcid string, params *[]interface
 	}
 
 	len := len(*params)
+	fmt.Println("------------------------------> ", len)
 	vParams = make([]reflect.Value, len+1)
 	vParams[0] = reflect.ValueOf(tcid)
 	if len != 0 {
@@ -50,8 +52,9 @@ func newTestCase(tcTestLogicMethod interface{}, tcid string, params *[]interface
 	return &testcase{testScript: currentScript, method: method, methodName: funcName, methodParams: &vParams, tcid: tcid, description: descr}
 }
 
-func (tc *testcase) runTcMethod() {
+func (tc *testcase) runTcMethod() (err error) {
 	/* Catch exeptions in the test method body, if any, in the test method. */
+	err = errors.New("Panic in runTcMethod.")
 	var flagCleanupCalled bool = false
 	var l = tc.testScript.logger
 	defer func() {
@@ -93,6 +96,8 @@ func (tc *testcase) runTcMethod() {
 	tc.logHorizonLine()
 	l.GenerateStep("PostTest", "PostTest")
 	tc.callCleanupMethod()
+
+	return nil
 }
 
 func (tc *testcase) callOnCrashMethod() {

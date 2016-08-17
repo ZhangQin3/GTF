@@ -21,7 +21,7 @@ const (
 type Test struct {
 	tcDefs       map[string]*tcDef
 	dataFile     string
-	DataReader   *csvdata.Reader
+	Data         *csvdata.Reader
 	DemoVariable string
 }
 
@@ -38,7 +38,7 @@ func (t *Test) SetParam(param string, value interface{}, flag ...paramFlag) {
 
 func (t *Test) SetDataFile(file string) {
 	t.dataFile = file
-	t.DataReader = csvdata.NewReader(common.DataFilesDir + file)
+	t.Data = csvdata.NewReader(common.DataFilesDir + file)
 }
 
 func (t *Test) DefineTestCase(tcid, description string) *tcDef {
@@ -51,22 +51,32 @@ func (t *Test) DefineTestCase(tcid, description string) *tcDef {
 	return d
 }
 
-func (t *Test) GenDataTestCase(tcid, descrFormat string, args ...string) *tcDef {
+func (t *Test) DefDataTestCases(descrFormat string, params ...string) {
 	if t.tcDefs == nil {
 		t.tcDefs = make(map[string]*tcDef)
 	}
 
+	f := reflect.ValueOf(fmt.Sprintf)
+
 	for {
-		m, err := t.Read()
+		m, err := t.Data.ReadRecord()
 		if err == io.EOF {
 			break
 		}
-		d := &tcDef{tcid: tcid, description: description}
-		t.tcDefs[tcid] = d
+
+		in := make([]reflect.Value, len(params)+1)
+		in[0] = reflect.ValueOf(descrFormat)
+		for k, param := range params {
+			fmt.Println(k, param, m[param])
+			in[k+1] = reflect.ValueOf(m[param])
+		}
+		descr := f.Call(in)
+
+		d := &tcDef{tcid: m["TCID"], description: descr[0].String()}
+		t.tcDefs[m["TCID"]] = d
 	}
-	// d := &tcDef{tcid: tcid, description: description}
-	// t.tcDefs[tcid] = d
-	return d
+
+	t.Data.Reset()
 }
 
 // Called by TestCaseProcedure in ths testcase scripts to run real tests,
@@ -90,6 +100,33 @@ func (t *Test) ExecuteTestCase(testLogicMethod interface{}, tcid string, params 
 
 	tc.logHeader()
 	tc.runTcMethod()
+}
+
+func (t *Test) ExecuteDataTestCases(testLogicMethod interface{}, params ...interface{}) {
+	var runErr error
+	for {
+		tcid, err := t.Data.GetCurrentTCID()
+		if err == io.EOF || runErr != nil {
+			break
+		}
+
+		tc := newTestCase(testLogicMethod, tcid, &params)
+		defer func() {
+			tc.logResult()
+		}()
+
+		if tcDef, ok := t.tcDefs[tcid]; ok {
+			if !tcDef.CalculateAppliability() {
+				return
+			}
+		} else {
+			fmt.Println("[ERROR] The testcase is not defined.")
+			return
+		}
+
+		tc.logHeader()
+		runErr = tc.runTcMethod()
+	}
 }
 
 // ExecStep exemine if the (first) return of the func f matchs the string expect.

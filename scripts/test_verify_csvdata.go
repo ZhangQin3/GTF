@@ -1,6 +1,7 @@
 package csvdata
 
 import (
+	// "fmt"
 	"gtf/drivers/assert"
 	"gtf/drivers/gtf"
 	"gtf/drivers/log"
@@ -20,13 +21,28 @@ func (t *Test) SetTestParams() {
 func (t *Test) CaseDefinitions() {
 	// t.DefineTestCase("tcid001", "Verify login to the github.")
 	// t.DefineTestCase("tcid002", "Create a github project.")
+	t.DefDataTestCases("this is a test %s  %s", "Name", "Age")
 }
 
 /* ============================================================= */
 func (t *Test) TestCaseProcedure() {
-	// t.ExecuteTestCase(t.VerifyLogin, "tcid001")
-	// t.ExecuteTestCase(t.VerifyCreateProject, "tcid002")
+	t.ExecuteTestCase(t.VerifyLogin, "tcid001")
+	// t.ExecuteDataTestCases(t.VerifyLogin)
 }
+
+// func (t *Test) VerifyLogin() {
+// 	type man struct {
+// 		Name string
+// 		Age  int
+// 		Test bool
+// 	}
+
+// 	var m man
+// 	t.Data.Read(&m)
+
+// 	fmt.Println(m.Age, m.Name, m.Test)
+
+// }
 
 func (t *Test) VerifyLogin(tcid string) {
 	log.Step(1, "Open github.")
