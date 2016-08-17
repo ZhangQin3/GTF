@@ -24,7 +24,7 @@ func (t *Test) CaseDefinitions() {
 	t.DefDataTestCases("this is a test %s  %s", "Name", "Age")
 }
 
-/* ============================================================= */
+/* ============================================================ */
 func (t *Test) TestCaseProcedure() {
 	t.ExecuteTestCase(t.VerifyLogin, "tcid001")
 	t.ExecuteDataTestCases(t.VerifyLogin1)
