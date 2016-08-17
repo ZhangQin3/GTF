@@ -38,13 +38,14 @@ func newTestCase(tcTestLogicMethod interface{}, tcid string, params *[]interface
 		panic("The first param of the gtf.Execute must be a testcase method!")
 	}
 
-	len := len(*params)
-	fmt.Println("------------------------------> ", len)
-	vParams = make([]reflect.Value, len+1)
-	vParams[0] = reflect.ValueOf(tcid)
-	if len != 0 {
-		for i := 0; i < len; i++ {
-			vParams[i+1] = reflect.ValueOf((*params)[i])
+	if method.Type().NumIn() != 0 {
+		len := len(*params)
+		vParams = make([]reflect.Value, len+1)
+		vParams[0] = reflect.ValueOf(tcid)
+		if len != 0 {
+			for i := 0; i < len; i++ {
+				vParams[i+1] = reflect.ValueOf((*params)[i])
+			}
 		}
 	}
 

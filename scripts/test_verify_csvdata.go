@@ -27,22 +27,22 @@ func (t *Test) CaseDefinitions() {
 /* ============================================================= */
 func (t *Test) TestCaseProcedure() {
 	t.ExecuteTestCase(t.VerifyLogin, "tcid001")
-	// t.ExecuteDataTestCases(t.VerifyLogin)
+	t.ExecuteDataTestCases(t.VerifyLogin1)
 }
 
-// func (t *Test) VerifyLogin() {
-// 	type man struct {
-// 		Name string
-// 		Age  int
-// 		Test bool
-// 	}
+func (t *Test) VerifyLogin1() {
+	type man struct {
+		Name string
+		Age  int
+		Test bool
+	}
 
-// 	var m man
-// 	t.Data.Read(&m)
+	var m man
+	t.Data.Read(&m)
 
-// 	fmt.Println(m.Age, m.Name, m.Test)
+	log.Info(m.Age, m.Name, m.Test)
 
-// }
+}
 
 func (t *Test) VerifyLogin(tcid string) {
 	log.Step(1, "Open github.")
