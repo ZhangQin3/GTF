@@ -1,6 +1,9 @@
 package gtf
 
-import tsuite "gtf/testsuites/tsuite"
+import (
+	tsuite "gtf/testsuites/tsuite"
+	"strings"
+)
 
 type testSuiteSchema struct {
 	TestScripts map[string]interface{}
@@ -26,11 +29,27 @@ func suiteSetup() *tsuite.TSuite {
 }
 
 func runTestScripts(ts *tsuite.TSuite) {
-	/*  fileName, tTest := "test_verify_test", new(test_verify_test.Test) */
+	/*  fileName, tTest := "test_verify_test", new(test_verify_test.Test) or
+	    fileName, tTest := "test_verify_test", "csv") */
 	for fileName, tTest := range TestSuiteSchema.TestScripts {
-		s := newTestScript(fileName, tTest, ts)
-		s.setup()
-		s.runTestCases()
-		s.cleanup()
+		str, ok := tTest.(string)
+
+		if ok {
+			// run actionword testscript
+			if strings.EqualFold(str, "csv") {
+				s := newAWScript(fileName, ts)
+				s.setup()
+				s.runTestCases()
+				s.cleanup()
+			} else {
+				panic("Only support csv file as actionword script.")
+			}
+		} else {
+			// run standard testscript
+			s := newTestScript(fileName, tTest, ts)
+			s.setup()
+			s.runTestCases()
+			s.cleanup()
+		}
 	}
 }

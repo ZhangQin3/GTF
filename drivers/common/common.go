@@ -18,6 +18,7 @@ var (
 	ScriptsPkgDir    = PkgDir() + `gtf\scripts\`
 	ScriptsSrcDir    = GoPath + `src\gtf\scripts\`
 	DataFilesDir     = GoPath + `src\gtf\datafiles\`
+	AWFilesDir       = GoPath + `src\gtf\awfiles\`
 	TsPkgDir         = PkgDir() + `gtf\testsuites\`
 	TsSrcDir         = GoPath + `src\gtf\testsuites\`
 	GtfSrcDir        = GoPath + `src\`
