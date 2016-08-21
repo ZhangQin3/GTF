@@ -70,12 +70,12 @@ func CompileTestScripts() {
 
 func appendExecuteInfo(fileName string, s scriptScheme) {
 	baseName := strings.TrimSuffix(fileName, ".go")
-	imports = imports + fmt.Sprintf("%s `gtf/scripts/%s`\n", baseName, baseName)
+
 	// pkgs = pkgs + fmt.Sprintf("`%s`: new(%s.Test),\n", baseName, baseName)
-	if strings.HasSuffix("fileName", ".csv") {
-		fmt.Println("--------------   -1234")
+	if strings.HasSuffix(fileName, ".csv") {
 		pkgs = pkgs + fmt.Sprintf("`%s`: `csv`,\n", baseName)
 	} else {
+		imports = imports + fmt.Sprintf("%s `gtf/scripts/%s`\n", baseName, baseName)
 		pkgs = pkgs + fmt.Sprintf("`%s`: new(%s.Test),\n", baseName, baseName)
 	}
 	if s.Repetitions == 0 {

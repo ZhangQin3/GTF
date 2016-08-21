@@ -17,7 +17,7 @@ func (ts *TSuite) SuiteScheme() {
        // {"script": "test_verify_test.go","repetitions":1}
        // {"script": "test_verify_second.go","repetitions":2}
        {"script": "test_verify_csvdata.go"}
-       {"script": "verify_actionword.csv"}
+       {"script": "verify_github.csv"}
        // {"script": "test_verify_github.go"}
 	`
 }
