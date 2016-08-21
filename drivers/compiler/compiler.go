@@ -54,11 +54,15 @@ func CompileTestScripts() {
 
 		// Test file doex NOT exist.
 		if !common.DoesFileExist(common.ScriptsSrcDir, fileName) {
-			fmt.Println("[WARNNING]: Test file " + fileName + " does NOT exist!")
+			// fmt.Println("[WARNNING]: Test file " + fileName + " does NOT exist!")
+			panic("Test file " + fileName + " does NOT exist!")
 			continue
 		}
 		fmt.Println(fileName)
-		common.CompileSingleFilePkg(fileName, common.ScriptsSrcDir, common.ScriptsPkgDir)
+		// just compile go file, excluding the .csv file
+		if strings.HasSuffix(fileName, ".go") {
+			common.CompileSingleFilePkg(fileName, common.ScriptsSrcDir, common.ScriptsPkgDir)
+		}
 		appendExecuteInfo(fileName, obj)
 	}
 	GenerateExecuteGoFile()
@@ -67,8 +71,13 @@ func CompileTestScripts() {
 func appendExecuteInfo(fileName string, s scriptScheme) {
 	baseName := strings.TrimSuffix(fileName, ".go")
 	imports = imports + fmt.Sprintf("%s `gtf/scripts/%s`\n", baseName, baseName)
-	pkgs = pkgs + fmt.Sprintf("`%s`: new(%s.Test),\n", baseName, baseName)
-
+	// pkgs = pkgs + fmt.Sprintf("`%s`: new(%s.Test),\n", baseName, baseName)
+	if strings.HasSuffix("fileName", ".csv") {
+		fmt.Println("--------------   -1234")
+		pkgs = pkgs + fmt.Sprintf("`%s`: `csv`,\n", baseName)
+	} else {
+		pkgs = pkgs + fmt.Sprintf("`%s`: new(%s.Test),\n", baseName, baseName)
+	}
 	if s.Repetitions == 0 {
 		// Execute each test file at least one time.
 		s.Repetitions = 1

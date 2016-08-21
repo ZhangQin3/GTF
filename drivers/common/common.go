@@ -16,13 +16,13 @@ var (
 	GoPkgDir         = PkgDir()
 	GoPath           = os.Getenv(`gopath`)
 	ScriptsPkgDir    = PkgDir() + `gtf\scripts\`
-	ScriptsSrcDir    = GoPath + `\src\gtf\scripts\`
-	DataFilesDir     = GoPath + `\src\gtf\datafiles\`
+	ScriptsSrcDir    = GoPath + `src\gtf\scripts\`
+	DataFilesDir     = GoPath + `src\gtf\datafiles\`
 	TsPkgDir         = PkgDir() + `gtf\testsuites\`
-	TsSrcDir         = GoPath + `\src\gtf\testsuites\`
-	GtfSrcDir        = GoPath + `\src\`
+	TsSrcDir         = GoPath + `src\gtf\testsuites\`
+	GtfSrcDir        = GoPath + `src\`
 	GtfPkgDir        = PkgDir() + `gtf\`
-	GoBinDir         = GoPath + `\bin\`
+	GoBinDir         = GoPath + `bin\`
 	GtfDriversPkgDir = PkgDir() + `gtf\drivers\`
 	ProcessorLevel   = os.Getenv(`PROCESSOR_LEVEL`)
 	DriversDir       = driversDir()
@@ -80,15 +80,15 @@ func CompileGtfCompiler() {
 
 func PkgDir() string {
 	if ProcessorLevel == "6" {
-		return fmt.Sprintf(`%s\pkg\windows_amd64\`, GoPath)
+		return fmt.Sprintf(`%spkg\windows_amd64\`, GoPath)
 	} else {
-		return fmt.Sprintf(`%s\pkg\windows_386\`, GoPath)
+		return fmt.Sprintf(`%spkg\windows_386\`, GoPath)
 	}
 }
 
 func BinDir() string {
-	gopath := os.Getenv("gopath")
-	return gopath + `\bin\`
+	// gopath := os.Getenv("gopath")
+	return GoPath + `bin\`
 }
 
 func driversDir() string {
