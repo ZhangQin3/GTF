@@ -1,3 +1,17 @@
+@tcid_ARUICT111111,Check default Gateway - Connection - Status - Local IP Network - DHCP Server,default,local_status_localipnetwork,case_msoadmin///case_cusadmin/case_useradmin,
+Actionword,Object,Parameter,Expected,Screenshot,Step
+OpenURL,,$url,,Yes,Open URL
+gotopage,loginpage,,,Yes,Open login page
+SetText,username,$username,,Yes,"Enter $username into text field ""UserName"""
+SetText,password,$password,,Yes,"Enter $password into text field ""Password"""
+ClickButton,apply,,,Yes,"Click button ""Apply"" to login"
+gotopage,basicsetup,,,Yes,Open basicsetup page
+SetSelect,language,English,,Yes,Select English in Language drop box
+ClickButton,apply,,,Yes,"Click button ""Apply"" to save setting"
+GetDescription,basicsetupmenu,,$BasicSetup,Yes,Verify 'BasicSetup' in menu bar is $BasicSetup
+
+
+@tcid_ARUICT2222222,Check default Gateway - Connection - Status - Local IP Network - DHCP Server,default,local_status_localipnetwork,case_msoadmin///case_cusadmin/case_useradmin,
 Actionword,Object,Parameter,Expected,Screenshot,Step
 OpenURL,,$url,,Yes,Open URL
 gotopage,loginpage,,,Yes,Open login page
