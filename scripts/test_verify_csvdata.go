@@ -27,7 +27,7 @@ func (t *Test) CaseDefinitions() {
 /* ============================================================ */
 func (t *Test) TestCaseProcedure() {
 	t.ExecuteTestCase(t.VerifyLogin, "tcid001")
-	t.ExecuteDataTestCases(t.VerifyLogin1)
+	// t.ExecuteDataTestCases(t.VerifyLogin1)
 }
 
 func (t *Test) VerifyLogin1() {

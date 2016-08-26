@@ -65,15 +65,14 @@ func (tc *testcase) runTcMethod() (err error) {
 				log.Error(err)
 				panic(err)
 			}
-			fmt.Printf("%s", b)
 
-			var buf []byte = make([]byte, 1500)
+			var buf []byte = make([]byte, 3072)
 			runtime.Stack(buf, true)
 			if err := l.GetTemplate().ExecuteTemplate(&b, "PANIC", fmt.Sprintf("%s\n", buf)); err != nil {
 				log.Error(err)
 				panic(err)
 			}
-
+			l.LabelError()
 			tc.logStackTrace(b.Bytes())
 
 			/* Call testcase cleanup on crash methed if testcase method of cleanup method panics. */

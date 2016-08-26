@@ -3,3 +3,6 @@ drivers/execute/execute.go
 drivers/csv/actionword.go
 drivers/csv/data.go
 drivers/csv/reader.go
+drivers/csv/csv/actionword.go
+drivers/csv/csv/data.go
+drivers/csv/csv/reader.go

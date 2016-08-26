@@ -164,3 +164,7 @@ func (l *Logger) PanicTime() int64 {
 func (l *Logger) ZeroPanicTime() {
 	l.panicTime = 0
 }
+
+func (l *Logger) LabelError() {
+	l.currentStep.IsFailed = true
+}

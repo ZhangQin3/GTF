@@ -3,7 +3,7 @@ package gtf
 import (
 	"fmt"
 	"gtf/drivers/common"
-	"gtf/drivers/csvdata"
+	"gtf/drivers/csv"
 	"gtf/drivers/log"
 	tsuite "gtf/testsuites/tsuite"
 	// "reflect"
@@ -16,7 +16,7 @@ var currentAWScript *actionwordScript
 /* Contains the data for each test script */
 type actionwordScript struct {
 	fileName  string /* test script file name without suffix(.go). */
-	data      *csvdata.Reader
+	data      *csv.Data
 	tSuite    *tsuite.TSuite
 	logger    *log.Logger /* logger for each test script.  */
 	startTime time.Time
@@ -24,7 +24,7 @@ type actionwordScript struct {
 }
 
 func newAWScript(fileName string, ts *tsuite.TSuite) *actionwordScript {
-	d := csvdata.NewReader(common.AWFilesDir + fileName)
+	d := csv.NewData(common.AWFilesDir + fileName)
 	s := &actionwordScript{fileName: fileName, data: d}
 	s.initLogger()
 	s.tSuite = ts
