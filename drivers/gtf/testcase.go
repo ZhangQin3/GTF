@@ -61,14 +61,11 @@ func (tc *testcase) runTcMethod() (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			var b bytes.Buffer
-			if err := l.GetTemplate().ExecuteTemplate(&b, "ERROR", fmt.Sprintf("%s\n%s\n", err, "===========================-------------------------")); err != nil {
-				log.Error(err)
-				panic(err)
-			}
+			b.WriteString(fmt.Sprintf("%s\n%s\n", err, "===========================-------------------------"))
 
 			var buf []byte = make([]byte, 3072)
 			runtime.Stack(buf, true)
-			if err := l.GetTemplate().ExecuteTemplate(&b, "PANIC", fmt.Sprintf("%s\n", buf)); err != nil {
+			if err := l.GetTemplate().ExecuteTemplate(&b, "PANIC", fmt.Sprintf("%s", buf)); err != nil {
 				log.Error(err)
 				panic(err)
 			}
