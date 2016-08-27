@@ -61,7 +61,7 @@ func (tc *testcase) runTcMethod() (err error) {
 	defer func() {
 		if err := recover(); err != nil {
 			var b bytes.Buffer
-			b.WriteString(fmt.Sprintf("%s\n%s\n", err, "===========================-------------------------"))
+			b.WriteString(fmt.Sprintf("%s\n%s", err, "===========================-------------------------"))
 
 			var buf []byte = make([]byte, 3072)
 			runtime.Stack(buf, true)
