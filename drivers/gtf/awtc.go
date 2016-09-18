@@ -6,54 +6,29 @@ import (
 	"fmt"
 	"gtf/drivers/log"
 	"io/ioutil"
-	"reflect"
+	// "reflect"
 	"regexp"
 	"runtime"
 	"time"
 )
 
 /* Contains the data for each testcase in a specfic test script. */
-type testcase struct {
+type awTestcase struct {
 	tcid          string
 	description   string
-	testScript    *testScript
-	method        reflect.Value    /* reflect method of testcase method. */
-	methodParams  *[]reflect.Value /* params of the testcase method. */
-	methodName    string           /* method name of the testcase method. */
-	cleaupMethod  string           /* method name , if any, called if the testcase method ends normally, to clean up the test environment. */
-	onCrashMethod string           /* method name , if any, called if the testcase method crashed. */
+	testScript    *awScript
+	cleaupMethod  string /* method name , if any, called if the testcase method ends normally, to clean up the test environment. */
+	onCrashMethod string /* method name , if any, called if the testcase method crashed. */
 	startTime     time.Time
 	endTime       time.Time
 }
 
-// tcTestLogicMethod: the real test method with test case's test logic
-// tcid: the first parameter of the method tcTestLogicMethod
-// params: other parameter(s)of the method tcTestLogicMethod, if any
-func newTestCase(tcTestLogicMethod interface{}, tcid string, params *[]interface{}) *testcase {
-	var vParams []reflect.Value
-	method := reflect.ValueOf(tcTestLogicMethod)
-	_, funcName := getFunctionName(method)
-
-	if method.Kind() != reflect.Func {
-		panic("The first param of the gtf.Execute must be a testcase method!")
-	}
-
-	if method.Type().NumIn() != 0 {
-		len := len(*params)
-		vParams = make([]reflect.Value, len+1)
-		vParams[0] = reflect.ValueOf(tcid)
-		if len != 0 {
-			for i := 0; i < len; i++ {
-				vParams[i+1] = reflect.ValueOf((*params)[i])
-			}
-		}
-	}
-
-	descr := currentScript.tcDefField(tcid, "description")
-	return &testcase{testScript: currentScript, method: method, methodName: funcName, methodParams: &vParams, tcid: tcid, description: descr}
+func newAwTestcase(tcid string) *awTestcase {
+	descr := currentAWScript.tcDefs[tcid].Description()
+	return &awTestcase{testScript: currentAWScript, tcid: tcid, description: descr}
 }
 
-func (tc *testcase) runTcMethod() (err error) {
+func (tc *awTestcase) runAwTestcase(heading []string, records [][]string) (err error) {
 	/* Catch exeptions in the test method body, if any, in the test method. */
 	err = errors.New("Panic in runTcMethod.")
 	var flagCleanupCalled bool = false
@@ -85,7 +60,8 @@ func (tc *testcase) runTcMethod() (err error) {
 	l.GenerateStep("PreTest", "PreTest")
 
 	/* Call testcase method. */
-	tc.method.Call(*tc.methodParams)
+	fmt.Println(heading)
+	fmt.Println(records)
 
 	/* Call testcase cleanup method if there is not panic in the procedure of testcase method
 	   if there is panic in the testcase method the cleanup method will not be called.*/
@@ -97,7 +73,7 @@ func (tc *testcase) runTcMethod() (err error) {
 	return nil
 }
 
-func (tc *testcase) callOnCrashMethod() {
+func (tc *awTestcase) callOnCrashMethod() {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error(err)
@@ -109,7 +85,7 @@ func (tc *testcase) callOnCrashMethod() {
 	tc.callMethod("CleanupOnCrash")
 }
 
-func (tc *testcase) callCleanupMethod() {
+func (tc *awTestcase) callCleanupMethod() {
 	defer func() {
 		if err := recover(); err != nil {
 			log.Error(err)
@@ -121,28 +97,28 @@ func (tc *testcase) callCleanupMethod() {
 	tc.callMethod("Cleanup")
 }
 
-func (tc *testcase) callMethod(method string) {
-	mc := tc.methodName + method
-	m := tc.testScript.tTest.MethodByName(mc)
-	if m.Kind() != reflect.Func {
-		log.Warningf("The %s method %s is NOT definded.", method, mc)
-	} else {
-		m.Call(nil)
-	}
+func (tc *awTestcase) callMethod(method string) {
+	// mc := tc.methodName + method
+	// m := tc.testScript.tTest.MethodByName(mc)
+	// if m.Kind() != reflect.Func {
+	// 	log.Warningf("The %s method %s is NOT definded.", method, mc)
+	// } else {
+	// 	m.Call(nil)
+	// }
 }
 
-func getFunctionName(rv reflect.Value) (string, string) {
-	qualifiedFuncName := runtime.FuncForPC(rv.Pointer()).Name()
+// func getFunctionName(rv reflect.Value) (string, string) {
+// 	qualifiedFuncName := runtime.FuncForPC(rv.Pointer()).Name()
 
-	reg := regexp.MustCompile(`(\w+).*?\w+\.\(\*Test\)\.(\w+)-fm`)
-	matchs := reg.FindStringSubmatch(qualifiedFuncName)
-	if matchs == nil {
-		panic("The qualified function name: " + qualifiedFuncName + ` does NOT match the regexp: (\w+).*?\w+\.\(\*Test\)\.(\w+)-fm.`)
-	}
-	return matchs[1], matchs[2]
-}
+// 	reg := regexp.MustCompile(`(\w+).*?\w+\.\(\*Test\)\.(\w+)-fm`)
+// 	matchs := reg.FindStringSubmatch(qualifiedFuncName)
+// 	if matchs == nil {
+// 		panic("The qualified function name: " + qualifiedFuncName + ` does NOT match the regexp: (\w+).*?\w+\.\(\*Test\)\.(\w+)-fm.`)
+// 	}
+// 	return matchs[1], matchs[2]
+// }
 
-func (tc *testcase) logResult() {
+func (tc *awTestcase) logResult() {
 	var faildSteps string
 	var l = tc.testScript.logger
 	defer func() {
@@ -171,7 +147,7 @@ func (tc *testcase) logResult() {
 	l.ReopenFile()
 }
 
-func (tc *testcase) logHeader() {
+func (tc *awTestcase) logHeader() {
 	start := time.Now()
 	tc.startTime = start
 	tc.testScript.logger.Output("TC_HEADER",
@@ -185,7 +161,7 @@ func (tc *testcase) logHeader() {
 }
 
 /* Here only input failedStps, if failedStps != "" indicates there is some error happened. */
-func (tc *testcase) testResultSummary(failedSteps string) bytes.Buffer {
+func (tc *awTestcase) testResultSummary(failedSteps string) bytes.Buffer {
 	end := time.Now()
 	tc.endTime = end
 	duration := end.Sub(tc.startTime)
@@ -204,11 +180,11 @@ func (tc *testcase) testResultSummary(failedSteps string) bytes.Buffer {
 	return buf
 }
 
-func (tc *testcase) logFailedSteps(failedSteps string) {
+func (tc *awTestcase) logFailedSteps(failedSteps string) {
 	tc.testScript.logger.Output("D_FAIL", log.LFileAndConsole, failedSteps)
 }
 
-func (tc *testcase) logStackTrace(buf []byte) {
+func (tc *awTestcase) logStackTrace(buf []byte) {
 	var l = tc.testScript.logger
 	t := l.PanicTime()
 	if t == 0 {
@@ -228,6 +204,6 @@ func (tc *testcase) logStackTrace(buf []byte) {
 	}
 }
 
-func (tc *testcase) logHorizonLine() {
+func (tc *awTestcase) logHorizonLine() {
 	tc.testScript.logger.Output("HORIZON", log.LOnlyFile, nil)
 }

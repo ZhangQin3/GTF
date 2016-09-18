@@ -1,78 +1,18 @@
 package gtf
 
 import (
-	"fmt"
-	"gtf/drivers/common"
-	"gtf/drivers/csv"
-	"gtf/drivers/log"
-	tsuite "gtf/testsuites/tsuite"
-	// "reflect"
-	"strconv"
-	"time"
+	"gtf/library/github"
+	"reflect"
 )
 
-var currentAWScript *awScript
-
-/* Contains the data for each test script */
-type awScript struct {
-	fileName     string /* test script file name without suffix(.go). */
-	acctionwords *csv.Actionwords
-	tSuite       *tsuite.TSuite
-	logger       *log.Logger /* logger for each test script.  */
-	startTime    time.Time
-	// endTime   time.Time
-}
-
-func newAWScript(fileName string, ts *tsuite.TSuite) *awScript {
-	aws := csv.NewActionwords(common.AWFilesDir + fileName)
-	s := &awScript{fileName: fileName, acctionwords: aws}
-	s.initLogger()
-	s.tSuite = ts
-	currentAWScript = s
-	return s
-}
-
-func (s *awScript) initLogger() {
-	logFile := s.fileName + "." + strconv.FormatInt(time.Now().Unix(), 10) + ".html"
-	common.CopyFile(logFile, `..\src\gtf\drivers\log\tmpl\header.html`)
-
-	s.logger = log.NewLogger(logFile, `..\src\gtf\drivers\log\tmpl\t1.tmpl`)
-}
-
-/* Log a test script information in the report file. */
-func (s *awScript) logHeader() {
-	s.startTime = time.Now()
-	data := log.TestScriptHdr{
-		s.startTime.String(),
-		s.fileName,
+func runTestcase(heading []string, records [][]string) {
+	var p interface{}
+	if heading[2] == "github" {
+		p = github.Github{}
 	}
-	s.logger.Output("LOG_HEADER", log.LOnlyFile, data)
-}
-func (s *awScript) logTailer() {
-	end := time.Now()
-	data := log.TestScriptTlr{
-		end.String(),
-		fmt.Sprintf("%.2f", end.Sub(s.startTime).Minutes()),
-	}
-	s.logger.Output("LOG_TAILER", log.LOnlyFile, data)
-}
 
-func (s *awScript) setup() {
-	s.logHeader()
-	/* Initialize TestParams from testsuite SuiteParams. */
-	TestParams = s.tSuite.SuiteParams
-	s.tSuite.CaseSetup()
-}
+	for _, record := range records {
+		p_typ := reflect.TypeOf(p)
 
-func (s *awScript) cleanup() {
-	s.tSuite.CaseCleanup()
-	s.logTailer()
-}
-
-func (s *awScript) runTestCases() {
-	/* Execute TestCaseProcedure, in the method TestCaseProcedure the function ExecuteTestCase
-	   will be called to execute each test procedure for each testcase via executing Test.ExecuteTestCase method. */
-	for i := 0; i < TestSuiteSchema.Repetitions[s.fileName]; i++ {
-		log.Warning(s.data.ReadRecord())
 	}
 }

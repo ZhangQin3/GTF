@@ -30,6 +30,10 @@ func (d *tcDef) RA(requirement, applicable string) *tcDef {
 	return d
 }
 
+func (d *tcDef) Description() string {
+	return d.description
+}
+
 // TODO priority
 func (d *tcDef) P(priority string) *tcDef {
 	d.priority = priority

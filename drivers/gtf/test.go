@@ -84,11 +84,6 @@ func (t *Test) DefDataTestCases(descrFormat string, params ...string) {
 // tcid is the first parameter of the method testLogicMethod
 // params is other parameter(s), if any, of the method testLogicMethod
 func (t *Test) ExecuteTestCase(testLogicMethod interface{}, tcid string, params ...interface{}) {
-	tc := newTestCase(testLogicMethod, tcid, &params)
-	defer func() {
-		tc.logResult()
-	}()
-
 	if tcDef, ok := t.tcDefs[tcid]; ok {
 		if !tcDef.CalculateAppliability() {
 			return
@@ -97,6 +92,11 @@ func (t *Test) ExecuteTestCase(testLogicMethod interface{}, tcid string, params 
 		fmt.Println("[ERROR] The testcase is not defined.")
 		return
 	}
+
+	tc := newTestCase(testLogicMethod, tcid, &params)
+	defer func() {
+		tc.logResult()
+	}()
 
 	tc.logHeader()
 	tc.runTcMethod()

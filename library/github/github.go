@@ -11,6 +11,12 @@ func OpenGithub(params ...func(caps map[string]interface{})) (Github, error) {
 	return Github(page), err
 }
 
+func (P *Github) OpenURL(url string) (Github, error) {
+	page, err := se.OpenPage(url, nil, params...)
+
+	return Github(page), err
+}
+
 func (p *Github) SignIn() *se.Element {
 	return p.Link(se.ByLinkText, "Sign in")
 }

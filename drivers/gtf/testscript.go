@@ -94,7 +94,6 @@ func (s *testScript) runTestCases() {
 		log.Error("[ERROR] No testcase defined in the script.")
 		return
 	}
-
 	/* Execute TestCaseProcedure, in the method TestCaseProcedure the function ExecuteTestCase
 	   will be called to execute each test procedure for each testcase via executing Test.ExecuteTestCase method. */
 	for i := 0; i < TestSuiteSchema.Repetitions[s.fileName]; i++ {
