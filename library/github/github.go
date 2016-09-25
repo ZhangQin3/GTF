@@ -12,7 +12,7 @@ func OpenGithub(params ...func(caps map[string]interface{})) (Github, error) {
 }
 
 func (P *Github) OpenURL(url string) (Github, error) {
-	page, err := se.OpenPage(url, nil, params...)
+	page, err := se.OpenPage(url, nil)
 
 	return Github(page), err
 }

@@ -112,7 +112,7 @@ func (s *awScript) ExecuteAwTestCase() {
 			return
 		}
 	} else {
-		panic("The testcase " + tcid + " is not defined.")
+		panic("The testcase: " + tcid + " is not defined.")
 	}
 
 	tc := newAwTestcase(tcid)

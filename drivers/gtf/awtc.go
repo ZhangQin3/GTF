@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"gtf/drivers/log"
 	"io/ioutil"
-	// "reflect"
 	"regexp"
 	"runtime"
 	"time"
@@ -60,8 +59,9 @@ func (tc *awTestcase) runAwTestcase(heading []string, records [][]string) (err e
 	l.GenerateStep("PreTest", "PreTest")
 
 	/* Call testcase method. */
-	fmt.Println(heading)
-	fmt.Println(records)
+	// fmt.Println(heading)
+	// fmt.Println(records)
+	executeAwTestCase(heading, records)
 
 	/* Call testcase cleanup method if there is not panic in the procedure of testcase method
 	   if there is panic in the testcase method the cleanup method will not be called.*/

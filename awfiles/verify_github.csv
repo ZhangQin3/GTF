@@ -7,10 +7,10 @@ SetText,Password,0web.driver,,Yes,"Enter $password into text field ""Password"""
 Click,Signin,,,Yes,"Click button ""Apply"" to login"
 
 
-@ARAW002,Demonstrate the second actionword function,tc_data,,,
+@ARAW002,Demonstrate the first actionword function,github,,,
 Actionword,Object,Parameter,Expected,Screenshot,Step
-OpenURL,,$url,,Yes,Open URL
-gotopage,loginpage,,,Yes,Open login page
-SetText,username,$username,,Yes,"Enter $username into text field ""UserName"""
-SetText,password,$password,,Yes,"Enter $password into text field ""Password"""
-ClickButton,apply,,,Yes,"Click button ""Apply"" to login"
+OpenURL,,http://www.github.com/,,Yes,Open URL
+Click,SignIn,,,Yes,Open login page
+SetText,Username,goautomation,,Yes,"Enter $username into text field ""UserName"""
+SetText,Password,0web.driver,,Yes,"Enter $password into text field ""Password"""
+Click,Signin,,,Yes,"Click button ""Apply"" to login"
