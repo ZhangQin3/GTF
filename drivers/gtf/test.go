@@ -111,10 +111,6 @@ func (t *Test) ExecuteDataTestCases(testLogicMethod interface{}, params ...inter
 		}
 
 		tc := newTestCase(testLogicMethod, tcid, &params)
-		defer func() {
-			tc.logResult()
-		}()
-
 		if tcDef, ok := t.tcDefs[tcid]; ok {
 			if !tcDef.CalculateAppliability() {
 				return
@@ -126,6 +122,7 @@ func (t *Test) ExecuteDataTestCases(testLogicMethod interface{}, params ...inter
 
 		tc.logHeader()
 		runErr = tc.runTcMethod()
+		tc.logResult()
 	}
 }
 

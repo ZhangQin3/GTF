@@ -15,22 +15,22 @@ type Test struct{ gtf.Test }
 func (t *Test) SetTestParams() {
 	t.SetParam("EnableRouter", 1, gtf.NonOverridable)
 	t.SetParam("CpeIpVersion", 1)
-	t.SetDataFile("test.csv")
+	t.SetDataFile("test_data.csv")
 }
 
 func (t *Test) CaseDefinitions() {
-	// t.DefineTestCase("tcid001", "Verify login to the github.")
-	// t.DefineTestCase("tcid002", "Create a github project.")
+	t.DefineTestCase("tcidLogin001", "Verify login to the github.")
+	// t.DefineTestCase("tcidLogin002", "Create a github project.")
 	t.DefDataTestCases("this is a test %s  %s", "Name", "Age")
 }
 
 /* ============================================================ */
 func (t *Test) TestCaseProcedure() {
-	t.ExecuteTestCase(t.VerifyLogin, "tcid001")
-	// t.ExecuteDataTestCases(t.VerifyLogin1)
+	// t.ExecuteTestCase(t.VerifyLogin, "tcidLogin001")
+	t.ExecuteDataTestCases(t.VerifyDataTable)
 }
 
-func (t *Test) VerifyLogin1() {
+func (t *Test) VerifyDataTable() {
 	type man struct {
 		Name string
 		Age  int
